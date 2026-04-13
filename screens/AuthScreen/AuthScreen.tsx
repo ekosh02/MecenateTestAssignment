@@ -4,7 +4,7 @@ import {
   PostsIntroLogoOverlay,
   PrimaryButton,
 } from "@/components";
-import { POSTS_API_PATH } from "@/constants";
+import { POSTS_API_PATH } from "@/constants/api";
 import { COLORS } from "@/constants/colors";
 import { useAuthLogoIntro } from "@/hooks";
 import { apiFetch } from "@/lib/api";

@@ -1,0 +1,23 @@
+import Svg, { Path } from "react-native-svg";
+import type { IconBaseProps } from "./types";
+
+export type CommentIconProps = IconBaseProps;
+
+const VIEWBOX_W = 15;
+const VIEWBOX_H = 14;
+
+const COMMENT_PATH =
+  "M15 6.09375C15 9.45996 11.6426 12.1875 7.50002 12.1875C6.4131 12.1875 5.38185 12 4.45021 11.6631C4.10158 11.918 3.53322 12.2666 2.85939 12.5596C2.15626 12.8643 1.30958 13.125 0.468764 13.125C0.278335 13.125 0.108413 13.0107 0.0351706 12.835C-0.0380716 12.6592 0.00294399 12.46 0.13478 12.3252L0.143569 12.3164C0.152358 12.3076 0.164077 12.2959 0.181655 12.2754C0.213882 12.2402 0.263686 12.1846 0.32521 12.1084C0.445327 11.9619 0.60646 11.7451 0.770522 11.4756C1.06349 10.9893 1.34181 10.3506 1.39748 9.63281C0.518569 8.63672 1.43097e-05 7.41504 1.43097e-05 6.09375C1.43097e-05 2.72754 3.35744 0 7.50002 0C11.6426 0 15 2.72754 15 6.09375Z";
+
+export const CommentIcon = ({
+  size = 18,
+  color = "#57626F",
+}: CommentIconProps) => {
+  const width = size;
+  const height = (size * VIEWBOX_H) / VIEWBOX_W;
+  return (
+    <Svg width={width} height={height} viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`} fill="none">
+      <Path d={COMMENT_PATH} fill={color} />
+    </Svg>
+  );
+};

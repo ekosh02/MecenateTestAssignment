@@ -2,11 +2,11 @@ import { COLORS } from "@/constants/colors";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  screen: {
+  root: {
     flex: 1,
     backgroundColor: COLORS.BACKGROUND,
-  },
-  listContent: {
-    gap: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
   },
 });

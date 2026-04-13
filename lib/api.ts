@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/constants";
+import { API_BASE_URL } from "@/constants/api";
 import { authStore } from "@/store";
 
 function buildHeaders(init?: RequestInit): Headers {
@@ -23,6 +23,33 @@ function apiLog(...parts: unknown[]) {
   }
 }
 
+async function logApiResponse(
+  response: Response,
+  method: string,
+  url: string,
+  ms: number,
+) {
+  if (!__DEV__) {
+    return;
+  }
+  let body: unknown;
+  try {
+    const text = await response.clone().text();
+    if (!text) {
+      body = null;
+    } else {
+      try {
+        body = JSON.parse(text) as unknown;
+      } catch {
+        body = text;
+      }
+    }
+  } catch {
+    body = "(body unreadable)";
+  }
+  apiLog("←", method, url, response.status, `${ms}ms`, body);
+}
+
 export function joinApiUrl(path: string): string {
   const base = API_BASE_URL.replace(/\/$/, "");
   const suffix = path.startsWith("/") ? path : `/${path}`;
@@ -42,7 +69,12 @@ export async function apiFetch(
       ...init,
       headers: buildHeaders(init),
     });
-    apiLog("←", method, url, response.status, `${Date.now() - startedAt}ms`);
+    await logApiResponse(
+      response,
+      method,
+      url,
+      Date.now() - startedAt,
+    );
     return response;
   } catch (error) {
     apiLog("×", method, url, `${Date.now() - startedAt}ms`, error);
