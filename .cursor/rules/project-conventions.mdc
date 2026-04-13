@@ -1,0 +1,58 @@
+---
+description: Conventions derived from this Expo app (layout, imports, TS, no comments)
+alwaysApply: true
+---
+
+# Project conventions (this repo)
+
+## Stack
+
+- Expo (SDK ~54), **expo-router** for navigation, **React 19** + **React Native** with **TypeScript strict**.
+- UI: **expo-image**, animations **react-native-reanimated** (import `react-native-reanimated` once in root layout as in `app/_layout.tsx`).
+- Lint: `npm run lint` (Expo flat ESLint in `eslint.config.js`).
+
+## Paths
+
+- Use the `@/` alias for app code imports (see `tsconfig.json` `"paths": { "@/*": ["./*"] }`). Prefer `@/components`, `@/hooks`, `@/screens`, `@/assets` over long relative paths across package boundaries.
+
+## Folder layout
+
+- **`app/`** — Expo Router: `_layout.tsx`, route files (`index.tsx`, `post-detail.tsx`). Keep `headerShown` and global shell consistent with existing `RootLayout`.
+- **`screens/`** — One folder per screen (e.g. `PostsScreen/`, `PostDetailScreen/`): main view (`PostsScreen.tsx`), optional `constants.ts`, `styles.ts`, `types.ts`, `index.ts` barrel. Re-export screens from `screens/index.ts` when adding new ones.
+- **`components/`** — Reusable UI grouped by domain: `headers/posts-header/`, `posts-intro/`. Each group: PascalCase component file, `styles.ts`, `types.ts` (interfaces for props), optional `constants.ts` only for values shared outside styles (e.g. size used by a hook), `index.tsx` or `index.ts` barrel. Aggregate in `components/index.ts`.
+- **`hooks/`** — Feature hooks in **kebab-case** folders (e.g. `use-posts-animation/`): `usePostsAnimation.ts`, animation-only numbers in `constants.ts`, `index.ts` exporting the hook and related public constants/types.
+- **`assets/`** — Static assets; centralize paths/types in `assets/images` (or similar) when the pattern exists.
+
+## Naming
+
+- React components and screen files: **PascalCase** (`PostsHeader.tsx`, `PostsScreen.tsx`).
+- Hooks: **camelCase** with `use` prefix (`usePostsAnimation.ts`).
+- Route files under `app/`: follow **expo-router** conventions (kebab-case file names where used, e.g. `post-detail.tsx`).
+
+## TypeScript
+
+- Prefer **`export interface`** for object shapes (props, screen/hook params, models). Use **`type`** only when an interface is insufficient (unions, conditional/mapped types, `typeof`/`keyof` patterns).
+- Use `export type { SomeInterface }` in barrels only for type-only re-exports when needed.
+
+## Comments
+
+- Do not add `//`, `/* */`, or JSDoc in hand-written source. Exceptions: generated or vendor files you must not edit (`expo-env.d.ts`, `node_modules`, lockfiles).
+
+## Constants
+
+- **Screen layout** (horizontal padding, header top padding): `screens/<Screen>/constants.ts` — values consumed by the screen and its `styles.ts` / router entry.
+- **Component layout** shared with animation (e.g. header logo slot size): `components/.../constants.ts` — keep in sync with any hook that reads the same value (e.g. `HEADER_LOGO_SIZE` + `usePostsAnimation`).
+- **Animation tuning** (durations, intro progress thresholds): `hooks/<feature>/constants.ts` only — not mixed with RN `StyleSheet` concerns.
+
+## Styles
+
+- Use **`StyleSheet.create`** in colocated `styles.ts`. Keep colors/spacing that belong to one surface in that file unless they are reused across files (then promote to the nearest `constants.ts`).
+
+## Components
+
+- Prefer **functional components**; default export for leaf components when the folder barrel re-exports a name (match existing `PostsHeader` / `PostsScreen` pattern).
+- Props: single `types.ts` with `export interface …Props`.
+
+## Readability
+
+- Small, focused files; avoid unrelated drive-by edits; mirror existing import order and formatting; run **Organize Imports** / ESLint fixes on save when using the repo `.vscode/settings.json`.
