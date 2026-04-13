@@ -1,0 +1,1 @@
+export const INPUT_FOCUS_BORDER_DURATION_MS = 180;

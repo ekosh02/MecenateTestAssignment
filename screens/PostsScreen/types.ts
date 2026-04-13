@@ -5,7 +5,7 @@ export interface PostPreview {
   excerpt: string;
   readTime: string;
   accentColor: string;
-  route: "/post-detail";
+  route: "/(private)/post-detail";
 }
 
 export interface LogoTargetLayout {
