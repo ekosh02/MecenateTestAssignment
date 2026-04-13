@@ -1,6 +1,16 @@
-import { BRAND_LOGO_TAB_HEADER_SLOT_SIZE } from "@/components/brand/constants";
-import { useCallback, useEffect, useState } from "react";
-import { LayoutChangeEvent, useWindowDimensions } from "react-native";
+import { BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE } from "@/components/brand/constants";
+import {
+  HEADER_ENTRY_OFFSET,
+  INTRO_HEADER_LOGO_REVEAL_AT,
+  INTRO_OVERLAY_FADE_FROM,
+  INTRO_PROGRESS_MOVE_END,
+  LOGO_GROW_DURATION_MS,
+  LOGO_MOVE_DURATION_MS,
+  SPLASH_LOGO_SIZE,
+  SPLASH_LOGO_START_SIZE,
+} from "@/hooks/use-posts-animation/constants";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useWindowDimensions, type View } from "react-native";
 import {
   Easing,
   cancelAnimation,
@@ -12,33 +22,22 @@ import {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import {
-  HEADER_ENTRY_OFFSET,
-  INTRO_HEADER_LOGO_REVEAL_AT,
-  INTRO_OVERLAY_FADE_FROM,
-  INTRO_PROGRESS_MOVE_END,
-  LOGO_GROW_DURATION_MS,
-  LOGO_MOVE_DURATION_MS,
-  SPLASH_LOGO_SIZE,
-  SPLASH_LOGO_START_SIZE,
-} from "./constants";
-import type { UsePostsAnimationParams } from "./types";
+import type { UseAuthLogoIntroParams } from "./types";
 
-export const usePostsAnimation = ({
+export const useAuthLogoIntro = ({
   topInset,
-  horizontalPadding,
-  headerTopPadding,
-  enabled = true,
-}: UsePostsAnimationParams) => {
+  scrollTopPadding,
+}: UseAuthLogoIntroParams) => {
   const { width, height } = useWindowDimensions();
   const progress = useSharedValue(0);
   const windowWidth = useSharedValue(width);
   const windowHeight = useSharedValue(height);
-  const targetX = useSharedValue(horizontalPadding);
-  const targetY = useSharedValue(topInset + headerTopPadding);
-  const targetW = useSharedValue(BRAND_LOGO_TAB_HEADER_SLOT_SIZE);
-  const targetH = useSharedValue(BRAND_LOGO_TAB_HEADER_SLOT_SIZE);
-  const [showHeaderLogo, setShowHeaderLogo] = useState(false);
+  const targetX = useSharedValue(0);
+  const targetY = useSharedValue(0);
+  const targetW = useSharedValue(BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE);
+  const targetH = useSharedValue(BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE);
+  const logoTargetRef = useRef<View>(null);
+  const [showSlotLogo, setShowSlotLogo] = useState(false);
 
   useEffect(() => {
     windowWidth.value = width;
@@ -46,35 +45,18 @@ export const usePostsAnimation = ({
   }, [width, height, windowWidth, windowHeight]);
 
   useEffect(() => {
-    targetX.value = horizontalPadding;
-    targetY.value = topInset + headerTopPadding;
-    targetW.value = BRAND_LOGO_TAB_HEADER_SLOT_SIZE;
-    targetH.value = BRAND_LOGO_TAB_HEADER_SLOT_SIZE;
-  }, [
-    topInset,
-    horizontalPadding,
-    headerTopPadding,
-    targetX,
-    targetY,
-    targetW,
-    targetH,
-  ]);
+    targetW.value = BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE;
+    targetH.value = BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE;
+    targetX.value = (width - BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE) / 2;
+    targetY.value = topInset + scrollTopPadding + 96;
+  }, [width, topInset, scrollTopPadding, targetX, targetY, targetW, targetH]);
 
-  const revealHeaderLogo = useCallback(() => {
-    setShowHeaderLogo(true);
+  const revealSlotLogo = useCallback(() => {
+    setShowSlotLogo(true);
   }, []);
 
   useEffect(() => {
-    if (!enabled) {
-      cancelAnimation(progress);
-      progress.value = INTRO_PROGRESS_MOVE_END;
-      setShowHeaderLogo(true);
-      return () => {
-        cancelAnimation(progress);
-      };
-    }
-
-    setShowHeaderLogo(false);
+    setShowSlotLogo(false);
     cancelAnimation(progress);
     progress.value = 0;
 
@@ -91,7 +73,7 @@ export const usePostsAnimation = ({
         },
         (finished) => {
           if (finished) {
-            runOnJS(revealHeaderLogo)();
+            runOnJS(revealSlotLogo)();
           }
         },
       ),
@@ -100,7 +82,7 @@ export const usePostsAnimation = ({
     return () => {
       cancelAnimation(progress);
     };
-  }, [enabled, progress, revealHeaderLogo]);
+  }, [progress, revealSlotLogo]);
 
   useAnimatedReaction(
     () => progress.value,
@@ -112,29 +94,24 @@ export const usePostsAnimation = ({
         previous < INTRO_HEADER_LOGO_REVEAL_AT &&
         current >= INTRO_HEADER_LOGO_REVEAL_AT;
       if (crossedReveal) {
-        runOnJS(revealHeaderLogo)();
+        runOnJS(revealSlotLogo)();
       }
     },
-    [revealHeaderLogo],
+    [revealSlotLogo],
   );
 
-  const onHeaderLogoLayout = useCallback(
-    ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
-      targetX.value = horizontalPadding + layout.x;
-      targetY.value = topInset + headerTopPadding + layout.y;
-      targetW.value = layout.width;
-      targetH.value = layout.height;
-    },
-    [
-      topInset,
-      horizontalPadding,
-      headerTopPadding,
-      targetX,
-      targetY,
-      targetW,
-      targetH,
-    ],
-  );
+  const onLogoTargetLayout = useCallback(() => {
+    requestAnimationFrame(() => {
+      logoTargetRef.current?.measureInWindow((x, y, w, h) => {
+        if (w > 0 && h > 0) {
+          targetX.value = x;
+          targetY.value = y;
+          targetW.value = w;
+          targetH.value = h;
+        }
+      });
+    });
+  }, [targetX, targetY, targetW, targetH]);
 
   const logoStyle = useAnimatedStyle(() => {
     const p = progress.value;
@@ -198,7 +175,7 @@ export const usePostsAnimation = ({
     };
   });
 
-  const headerStyle = useAnimatedStyle(() => {
+  const chromeStyle = useAnimatedStyle(() => {
     const p = progress.value;
     return {
       opacity: interpolate(
@@ -218,24 +195,11 @@ export const usePostsAnimation = ({
     };
   });
 
-  const splashBackdropStyle = useAnimatedStyle(() => {
-    const p = progress.value;
-    if (p <= 1) {
-      return { opacity: 1 };
-    }
-    if (p >= INTRO_PROGRESS_MOVE_END) {
-      return { opacity: 0 };
-    }
-    return {
-      opacity: interpolate(p, [1, INTRO_PROGRESS_MOVE_END], [1, 0]),
-    };
-  });
-
   return {
-    headerStyle,
+    chromeStyle,
     logoStyle,
-    splashBackdropStyle,
-    onHeaderLogoLayout,
-    showHeaderLogo,
+    logoTargetRef,
+    onLogoTargetLayout,
+    showSlotLogo,
   };
 };

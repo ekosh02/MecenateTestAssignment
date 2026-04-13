@@ -1,15 +1,20 @@
-import { IMAGES } from "@/assets/images";
-import { Input, PrimaryButton } from "@/components";
+import {
+  BrandLogoMark,
+  Input,
+  PostsIntroLogoOverlay,
+  PrimaryButton,
+} from "@/components";
 import { COLORS } from "@/constants/colors";
+import { useAuthLogoIntro } from "@/hooks";
 import { persistAuthToken } from "@/lib/auth-secure-token";
 import { authStore } from "@/store";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, Text, type TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DEFAULT_AUTH_TOKEN } from "./constants";
 import { styles } from "./styles";
@@ -19,13 +24,28 @@ const AuthScreen = () => {
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const insets = useSafeAreaInsets();
+  const scrollTopPadding = Math.max(insets.top, 16);
+
+  const {
+    chromeStyle,
+    logoStyle,
+    logoTargetRef,
+    onLogoTargetLayout,
+    showSlotLogo,
+  } = useAuthLogoIntro({
+    topInset: insets.top,
+    scrollTopPadding,
+  });
 
   useEffect(() => {
+    if (!showSlotLogo) {
+      return;
+    }
     const id = requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
     return () => cancelAnimationFrame(id);
-  }, []);
+  }, [showSlotLogo]);
 
   const onSubmit = () => {
     const trimmed = value.trim();
@@ -36,7 +56,7 @@ const AuthScreen = () => {
       setSubmitting(true);
       try {
         await persistAuthToken(trimmed);
-        authStore.setToken(trimmed);
+        authStore.setTokenAfterAuthScreen(trimmed);
       } finally {
         setSubmitting(false);
       }
@@ -59,7 +79,7 @@ const AuthScreen = () => {
       style={styles.root}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingTop: Math.max(insets.top, 16) },
+        { paddingTop: scrollTopPadding },
       ]}
       keyboardShouldPersistTaps="handled"
       enableOnAndroid
@@ -69,15 +89,16 @@ const AuthScreen = () => {
         inputRef.current?.blur();
       }}
     >
-      <View>
+      <Animated.View style={chromeStyle}>
         <View style={styles.logoSection}>
           <View style={styles.logoOuter}>
-            <View style={styles.logoInner}>
-              <Image
-                source={IMAGES.LOGO}
-                style={styles.logoImage}
-                contentFit="contain"
-              />
+            <View
+              ref={logoTargetRef}
+              collapsable={false}
+              style={styles.logoInner}
+              onLayout={onLogoTargetLayout}
+            >
+              <BrandLogoMark visible={showSlotLogo} />
             </View>
           </View>
         </View>
@@ -124,7 +145,8 @@ const AuthScreen = () => {
             style={styles.primaryButton}
           />
         </View>
-      </View>
+      </Animated.View>
+      <PostsIntroLogoOverlay animatedStyle={logoStyle} />
     </KeyboardAwareScrollView>
   );
 };

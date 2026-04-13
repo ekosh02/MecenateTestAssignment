@@ -1,0 +1,3 @@
+export const BRAND_LOGO_TAB_HEADER_SLOT_SIZE = 52;
+
+export const BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE = 88;

@@ -1,5 +1,5 @@
 export * from "./auth-gate";
+export * from "./brand";
 export * from "./buttons";
-export * from "./headers";
 export * from "./input";
 export * from "./posts-intro";

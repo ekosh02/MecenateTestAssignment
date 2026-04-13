@@ -1,6 +1,7 @@
+import { BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE } from "@/components/brand/constants";
 import { COLORS } from "@/constants/colors";
 import { Platform, StyleSheet } from "react-native";
-import { AUTH_LOGO_SIZE, SCREEN_HORIZONTAL_PADDING } from "./constants";
+import { SCREEN_HORIZONTAL_PADDING } from "./constants";
 
 const TOKEN_MONO_FONT = Platform.select({
   ios: "Menlo",
@@ -37,13 +38,14 @@ const LOGO_SHADOW = Platform.select({
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#F4F0FF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
     paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
     paddingVertical: 32,
+    position: "relative",
   },
   logoSection: {
     alignItems: "center",
@@ -56,15 +58,11 @@ export const styles = StyleSheet.create({
     ...LOGO_SHADOW,
   },
   logoInner: {
-    width: AUTH_LOGO_SIZE,
-    height: AUTH_LOGO_SIZE,
+    width: BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE,
+    height: BRAND_LOGO_AUTH_SCREEN_SLOT_SIZE,
     borderRadius: 22,
     overflow: "hidden",
     backgroundColor: "#FAF5FF",
-  },
-  logoImage: {
-    width: "100%",
-    height: "100%",
   },
   headline: {
     fontSize: 26,

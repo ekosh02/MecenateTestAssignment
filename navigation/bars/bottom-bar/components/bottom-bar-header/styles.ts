@@ -1,5 +1,5 @@
+import { BRAND_LOGO_TAB_HEADER_SLOT_SIZE } from "@/components/brand/constants";
 import { Platform, StyleSheet } from "react-native";
-import { HEADER_LOGO_SIZE } from "./constants";
 
 export const styles = StyleSheet.create({
   content: {
@@ -10,26 +10,18 @@ export const styles = StyleSheet.create({
   brand: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
+    gap: 10,
   },
   logoSlot: {
-    width: HEADER_LOGO_SIZE,
-    height: HEADER_LOGO_SIZE,
-    borderRadius: 18,
+    width: BRAND_LOGO_TAB_HEADER_SLOT_SIZE,
+    height: BRAND_LOGO_TAB_HEADER_SLOT_SIZE,
+    borderRadius: 14,
     overflow: "hidden",
   },
-  logoImage: {
-    width: "100%",
-    height: "100%",
-  },
-  logoPlaceholder: {
-    width: "100%",
-    height: "100%",
-  },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
-    lineHeight: 22,
+    lineHeight: 20,
     color: "#111827",
     paddingVertical: 0,
     ...Platform.select({
