@@ -1,4 +1,4 @@
-export type PostPreview = {
+export interface PostPreview {
   id: string;
   category: string;
   title: string;
@@ -6,21 +6,21 @@ export type PostPreview = {
   readTime: string;
   accentColor: string;
   route: "/post-detail";
-};
+}
 
-export type LogoTargetLayout = {
+export interface LogoTargetLayout {
   x: number;
   y: number;
   width: number;
   height: number;
-};
+}
 
-export type PostsContentProps = {
+export interface PostsContentProps {
   posts: readonly PostPreview[];
   onOpenPost: (post: PostPreview) => void;
-};
+}
 
-export type PostCardProps = {
+export interface PostCardProps {
   post: PostPreview;
   onPress: (post: PostPreview) => void;
-};
+}

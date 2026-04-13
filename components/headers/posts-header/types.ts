@@ -1,6 +1,6 @@
 import type { LayoutChangeEvent } from "react-native";
 
-export type PostsHeaderProps = {
+export interface PostsHeaderProps {
   onLogoLayout: (event: LayoutChangeEvent) => void;
   showLogo?: boolean;
-};
+}
