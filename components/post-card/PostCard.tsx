@@ -6,7 +6,11 @@ import { Text, View } from "react-native";
 import { styles } from "./styles";
 import type { PostCardProps } from "./types";
 
-const PostCard = ({ post }: PostCardProps) => (
+const PostCard = ({
+  post,
+  coverAspectRatio,
+  coverImageRef,
+}: PostCardProps) => (
   <View style={styles.root}>
     <View style={styles.authorHeader}>
       <Image
@@ -22,12 +26,12 @@ const PostCard = ({ post }: PostCardProps) => (
       )}
     </View>
     <Image
-      source={{ uri: post.coverUrl }}
-      style={styles.cover}
+      source={coverImageRef ?? { uri: post.coverUrl }}
+      style={[styles.cover, { aspectRatio: coverAspectRatio }]}
       contentFit="cover"
     />
     <Text style={styles.title}>{post.title}</Text>
-    <Text style={styles.preview} numberOfLines={3}>
+    <Text style={styles.preview} numberOfLines={2}>
       {post.preview}
     </Text>
     <View style={styles.meta}>

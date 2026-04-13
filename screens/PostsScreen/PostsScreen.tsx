@@ -1,15 +1,28 @@
 import {
-  PostCard,
+  PostCardSkeleton,
+  PostListRow,
   PostsFeedError,
-  PostsFeedLoading,
   PostsListFooter,
 } from "@/components";
+import { COLORS } from "@/constants/colors";
 import { fetchPosts, type Post } from "@/lib/posts-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
-import { FlatList, type ListRenderItem, View } from "react-native";
-import { PAGE_SIZE } from "./constants";
+import { useCallback, useMemo } from "react";
+import {
+  FlatList,
+  RefreshControl,
+  type ListRenderItem,
+  View,
+} from "react-native";
+import { PAGE_SIZE, SKELETON_PLACEHOLDER_COUNT } from "./constants";
 import { styles } from "./styles";
+
+type SkeletonRow = { kind: "skeleton"; id: string };
+
+type FeedRow = Post | SkeletonRow;
+
+const isSkeletonRow = (item: FeedRow): item is SkeletonRow =>
+  "kind" in item && item.kind === "skeleton";
 
 const PostsScreen = () => {
   const query = useInfiniteQuery({
@@ -29,10 +42,28 @@ const PostsScreen = () => {
 
   const posts = query.data?.pages.flatMap((p) => p.data.posts) ?? [];
 
-  const keyExtractor = useCallback((item: Post) => item.id, []);
+  const skeletonRows = useMemo<FeedRow[]>(
+    () =>
+      Array.from({ length: SKELETON_PLACEHOLDER_COUNT }, (_, i) => ({
+        kind: "skeleton",
+        id: `skeleton-${i}`,
+      })),
+    [],
+  );
 
-  const renderItem = useCallback<ListRenderItem<Post>>(
-    ({ item }) => <PostCard post={item} />,
+  const showFeedSkeleton =
+    query.isPending ||
+    (!query.isPending &&
+      query.isFetching &&
+      !query.isFetchingNextPage);
+
+  const listData: FeedRow[] = showFeedSkeleton ? skeletonRows : posts;
+
+  const keyExtractor = useCallback((item: FeedRow) => item.id, []);
+
+  const renderItem = useCallback<ListRenderItem<FeedRow>>(
+    ({ item }) =>
+      isSkeletonRow(item) ? <PostCardSkeleton /> : <PostListRow post={item} />,
     [],
   );
 
@@ -41,14 +72,31 @@ const PostsScreen = () => {
   }, [query.fetchNextPage]);
 
   const onEndReached = useCallback(() => {
+    if (query.isPending) {
+      return;
+    }
+    if (query.isFetching && !query.isFetchingNextPage) {
+      return;
+    }
     if (query.hasNextPage && !query.isFetchingNextPage) {
       void query.fetchNextPage();
     }
-  }, [query.fetchNextPage, query.hasNextPage, query.isFetchingNextPage]);
+  }, [
+    query.fetchNextPage,
+    query.hasNextPage,
+    query.isFetching,
+    query.isFetchingNextPage,
+    query.isPending,
+  ]);
 
-  if (query.isPending) {
-    return <PostsFeedLoading />;
-  }
+  const onRefresh = useCallback(() => {
+    void query.refetch();
+  }, [query.refetch]);
+
+  const refreshing =
+    !query.isPending &&
+    query.isFetching &&
+    !query.isFetchingNextPage;
 
   if (query.isError) {
     return (
@@ -61,19 +109,29 @@ const PostsScreen = () => {
 
   return (
     <View style={styles.screen}>
-      <FlatList<Post>
-        data={posts}
+      <FlatList<FeedRow>
+        data={listData}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.PRIMARY}
+            colors={[COLORS.PRIMARY]}
+          />
+        }
         onEndReachedThreshold={0.4}
         onEndReached={onEndReached}
         ListFooterComponent={
-          <PostsListFooter
-            isFetchingNextPage={query.isFetchingNextPage}
-            hasNextPage={Boolean(query.hasNextPage)}
-            onLoadMore={onLoadMore}
-          />
+          showFeedSkeleton ? null : (
+            <PostsListFooter
+              isFetchingNextPage={query.isFetchingNextPage}
+              hasNextPage={Boolean(query.hasNextPage)}
+              onLoadMore={onLoadMore}
+            />
+          )
         }
       />
     </View>

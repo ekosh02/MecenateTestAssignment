@@ -14,7 +14,6 @@ export const styles = StyleSheet.create({
   },
   cover: {
     width: "100%",
-    aspectRatio: 3 / 4,
     backgroundColor: "#E5E7EB",
   },
   title: {
@@ -69,5 +68,42 @@ export const styles = StyleSheet.create({
   },
   metaTextLiked: {
     color: "#FFFFFF",
+  },
+  skeletonAuthorLine: {
+    flex: 1,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: "#E5E7EB",
+    maxWidth: "55%",
+  },
+  skeletonCoverBlock: {
+    width: "100%",
+    aspectRatio: 1,
+    backgroundColor: "#E5E7EB",
+  },
+  skeletonTitleLine: {
+    height: 18,
+    borderRadius: 6,
+    backgroundColor: "#E5E7EB",
+    marginTop: 12,
+    marginBottom: 8,
+    marginHorizontal: 13,
+    width: "78%",
+  },
+  skeletonPreviewLine: {
+    height: 14,
+    borderRadius: 6,
+    backgroundColor: "#E5E7EB",
+    marginBottom: 6,
+    marginHorizontal: 13,
+  },
+  skeletonPreviewLineShort: {
+    width: "62%",
+  },
+  skeletonMetaPill: {
+    width: 72,
+    height: 34,
+    borderRadius: 16,
+    backgroundColor: "#F0F2F5",
   },
 });

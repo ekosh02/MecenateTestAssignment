@@ -1,0 +1,1 @@
+export const COVER_IMAGE_FALLBACK_ASPECT_RATIO = 3 / 4;
