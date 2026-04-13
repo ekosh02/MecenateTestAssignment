@@ -1,1 +1,2 @@
-export const SPLASH_TIMEOUT_MS = 3000;
+export const SCREEN_HORIZONTAL_PADDING = 20;
+export const HEADER_TOP_PADDING = 2;

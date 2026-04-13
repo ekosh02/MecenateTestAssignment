@@ -1,1 +1,3 @@
-export { PostsScreen } from "@/screens";
+import { PostsScreen } from "@/screens";
+
+export default PostsScreen;

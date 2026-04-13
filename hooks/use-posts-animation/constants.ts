@@ -1,0 +1,9 @@
+export const SPLASH_LOGO_START_SIZE = 52;
+export const SPLASH_LOGO_SIZE = 188;
+export const LOGO_GROW_DURATION_MS = 560;
+export const LOGO_MOVE_DURATION_MS = 620;
+export const HEADER_ENTRY_OFFSET = 12;
+
+export const INTRO_PROGRESS_MOVE_END = 2;
+export const INTRO_HEADER_LOGO_REVEAL_AT = 1.945;
+export const INTRO_OVERLAY_FADE_FROM = 1.985;

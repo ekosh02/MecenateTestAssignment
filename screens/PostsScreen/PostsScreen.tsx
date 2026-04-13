@@ -1,74 +1,36 @@
-import { IMAGES } from "@/assets/images";
-import { Image } from "expo-image";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { SPLASH_TIMEOUT_MS } from "./constants";
+import { PostsHeader, PostsIntroLogoOverlay } from "@/components";
+import { usePostsAnimation } from "@/hooks";
+import { View } from "react-native";
+import Animated from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { HEADER_TOP_PADDING, SCREEN_HORIZONTAL_PADDING } from "./constants";
+import { styles } from "./styles";
 
 const PostsScreen = () => {
-  const router = useRouter();
-  const [showSplash, setShowSplash] = useState(true);
+  const insets = useSafeAreaInsets();
+  const headerPaddingTop = insets.top + HEADER_TOP_PADDING;
 
-  useEffect(() => {
-    const id = setTimeout(() => setShowSplash(false), SPLASH_TIMEOUT_MS);
-    return () => clearTimeout(id);
-  }, []);
+  const { headerStyle, logoStyle, onHeaderLogoLayout, showHeaderLogo } =
+    usePostsAnimation({
+      topInset: insets.top,
+      horizontalPadding: SCREEN_HORIZONTAL_PADDING,
+      headerTopPadding: HEADER_TOP_PADDING,
+    });
 
   return (
-    <View style={styles.container}>
-      {showSplash ? (
-        <Image source={IMAGES.LOGO} style={styles.logo} contentFit="contain" />
-      ) : (
-        <View style={styles.main}>
-          <Text style={styles.title}>Post Screen</Text>
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={() => router.push("/post-detail")}
-          >
-            <Text style={styles.buttonLabel}>Open post detail</Text>
-          </Pressable>
-        </View>
-      )}
+    <View style={styles.screen}>
+      <Animated.View
+        style={[styles.header, { paddingTop: headerPaddingTop }, headerStyle]}
+      >
+        <PostsHeader
+          onLogoLayout={onHeaderLogoLayout}
+          showLogo={showHeaderLogo}
+        />
+      </Animated.View>
+
+      <PostsIntroLogoOverlay animatedStyle={logoStyle} />
     </View>
   );
 };
 
 export default PostsScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-  },
-  logo: {
-    width: 220,
-    height: 220,
-  },
-  main: {
-    alignItems: "center",
-    gap: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "600",
-  },
-  button: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: "#111",
-    borderRadius: 8,
-  },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  buttonLabel: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
