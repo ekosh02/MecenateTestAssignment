@@ -4,11 +4,14 @@ import {
   PostsIntroLogoOverlay,
   PrimaryButton,
 } from "@/components";
+import { POSTS_API_PATH } from "@/constants";
 import { COLORS } from "@/constants/colors";
 import { useAuthLogoIntro } from "@/hooks";
+import { apiFetch } from "@/lib/api";
 import { persistAuthToken } from "@/lib/auth-secure-token";
 import { authStore } from "@/store";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { useEffect, useRef, useState } from "react";
@@ -21,7 +24,6 @@ import { styles } from "./styles";
 
 const AuthScreen = () => {
   const [value, setValue] = useState(DEFAULT_AUTH_TOKEN);
-  const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const insets = useSafeAreaInsets();
   const scrollTopPadding = Math.max(insets.top, 16);
@@ -47,20 +49,29 @@ const AuthScreen = () => {
     return () => cancelAnimationFrame(id);
   }, [showSlotLogo]);
 
+  const sessionMutation = useMutation({
+    mutationFn: async (token: string) => {
+      const response = await apiFetch(POSTS_API_PATH, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        throw new Error(`Код ${response.status}`);
+      }
+      return token;
+    },
+    onSuccess: async (token) => {
+      await persistAuthToken(token);
+      authStore.setTokenAfterAuthScreen(token);
+    },
+  });
+
   const onSubmit = () => {
     const trimmed = value.trim();
-    if (!trimmed || submitting) {
+    if (!trimmed || sessionMutation.isPending) {
       return;
     }
-    void (async () => {
-      setSubmitting(true);
-      try {
-        await persistAuthToken(trimmed);
-        authStore.setTokenAfterAuthScreen(trimmed);
-      } finally {
-        setSubmitting(false);
-      }
-    })();
+    sessionMutation.mutate(trimmed);
   };
 
   const onCopySampleToken = () => {
@@ -140,10 +151,17 @@ const AuthScreen = () => {
           <PrimaryButton
             title="Продолжить"
             onPress={onSubmit}
-            loading={submitting}
+            loading={sessionMutation.isPending}
             disabled={!value.trim()}
             style={styles.primaryButton}
           />
+          {sessionMutation.isError ? (
+            <Text style={styles.errorText}>
+              {sessionMutation.error instanceof Error
+                ? sessionMutation.error.message
+                : "Ошибка запроса"}
+            </Text>
+          ) : null}
         </View>
       </Animated.View>
       <PostsIntroLogoOverlay animatedStyle={logoStyle} />

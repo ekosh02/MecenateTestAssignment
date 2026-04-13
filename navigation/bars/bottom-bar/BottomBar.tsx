@@ -7,7 +7,7 @@ import { useRef } from "react";
 import { View } from "react-native";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BottomBarHeader } from "./components/bottom-bar-header";
+import { BottomBarHeader } from "./components";
 import {
   BOTTOM_BAR_BRAND_HEADER_HORIZONTAL_PADDING,
   BOTTOM_BAR_BRAND_HEADER_TOP_OFFSET,

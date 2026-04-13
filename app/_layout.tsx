@@ -1,6 +1,8 @@
 import { AuthGate } from "@/components";
 import { getSecureAuthToken } from "@/lib/auth-secure-token";
+import { createQueryClient } from "@/lib/query-client";
 import { authStore } from "@/store";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -10,6 +12,7 @@ import "react-native-reanimated";
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [queryClient] = useState(() => createQueryClient());
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -35,9 +38,11 @@ export default function RootLayout() {
 
   return (
     <>
-      <AuthGate>
-        <Stack screenOptions={{ headerShown: false }} />
-      </AuthGate>
+      <QueryClientProvider client={queryClient}>
+        <AuthGate>
+          <Stack screenOptions={{ headerShown: false }} />
+        </AuthGate>
+      </QueryClientProvider>
       <StatusBar style="auto" />
     </>
   );

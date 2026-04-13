@@ -135,4 +135,10 @@ export const styles = StyleSheet.create({
   primaryButton: {
     marginTop: 22,
   },
+  errorText: {
+    marginTop: 12,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#B91C1C",
+  },
 });
