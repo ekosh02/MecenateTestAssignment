@@ -1,58 +1,130 @@
 ---
-description: Conventions derived from this Expo app (layout, imports, TS, no comments)
+description: Normative layout — where code lives, how to add screens/components/hooks/navigation, TS and style rules
 alwaysApply: true
 ---
 
-# Project conventions (this repo)
+# Project conventions (normative)
 
-## Stack
+These rules describe **how to extend the app**, not a tour of existing files. When you add a feature, place code by **responsibility** and **reuse** using the sections below.
 
-- Expo (SDK ~54), **expo-router** for navigation, **React 19** + **React Native** with **TypeScript strict**.
-- UI: **expo-image**, animations **react-native-reanimated** (import `react-native-reanimated` once in root layout as in `app/_layout.tsx`).
-- Lint: `npm run lint` (Expo flat ESLint in `eslint.config.js`).
+## Stack (fixed)
 
-## Paths
+- **Expo** (SDK ~54), **expo-router** (file-based routes), **React 19**, **React Native**, **TypeScript strict**.
+- **State:** MobX (`mobx`, `mobx-react-lite`); stores under `store/`.
+- **Secrets / persistence:** `expo-secure-store` and small helpers under `lib/` (not inside components).
+- **UI:** `expo-image`, `@expo/vector-icons`, and other Expo modules as needed; **react-native-reanimated** imported once in root `app/_layout.tsx`.
+- **Quality:** `npm run lint` (Expo ESLint, `eslint.config.js`).
 
-- Use the `@/` alias for app code imports (see `tsconfig.json` `"paths": { "@/*": ["./*"] }`). Prefer `@/components`, `@/hooks`, `@/screens`, `@/assets` over long relative paths across package boundaries.
+## Import paths
 
-## Folder layout
+- Use the **`@/`** alias (`tsconfig.json`: `"@/*": ["./*"]`).
+- Cross-folder imports: prefer `@/components`, `@/screens`, `@/hooks`, `@/navigation`, `@/store`, `@/lib`, `@/constants`, `@/assets` over long `../../` chains.
 
-- **`app/`** — Expo Router: `_layout.tsx`, route files (`index.tsx`, `post-detail.tsx`). Keep `headerShown` and global shell consistent with existing `RootLayout`.
-- **`screens/`** — One folder per screen (e.g. `PostsScreen/`, `PostDetailScreen/`): main view (`PostsScreen.tsx`), optional `constants.ts`, `styles.ts`, `types.ts`, `index.ts` barrel. Re-export screens from `screens/index.ts` when adding new ones.
-- **`components/`** — Reusable UI grouped by domain: `headers/posts-header/`, `posts-intro/`. Each group: PascalCase component file, `styles.ts`, `types.ts` (interfaces for props), optional `constants.ts` only for values shared outside styles (e.g. size used by a hook), `index.tsx` or `index.ts` barrel. Aggregate in `components/index.ts`.
-- **`hooks/`** — Feature hooks in **kebab-case** folders (e.g. `use-posts-animation/`): `usePostsAnimation.ts`, animation-only numbers in `constants.ts`, `index.ts` exporting the hook and related public constants/types.
-- **`assets/`** — Static assets; centralize paths/types in `assets/images` (or similar) when the pattern exists.
+## Layer map (where new code goes)
 
-## Naming
+| Layer | Path | Put here |
+|--------|------|----------|
+| Routes only | `app/` | Layouts, redirects, thin route files that render a screen or navigator. **No** heavy UI logic duplicated from `screens/`. |
+| Full screens | `screens/<ScreenName>/` | One folder per screen: main `ScreenName.tsx`, `styles.ts`, optional `constants.ts`, `types.ts`, `index.ts`; register the screen in `screens/index.ts` when the barrel pattern is used. |
+| Reusable UI | `components/<domain>/` | Anything used from **multiple** screens or as a **generic** building block (inputs, buttons, brand marks). |
+| Navigator chrome | `navigation/.../` | UI **tied to a specific navigator** (tab bar, custom header for that stack). Use `navigation/.../components/<kebab-name>/` with the **same inner file pattern** as `components/` (component + `styles.ts` + `types.ts` + barrel). Colocated `styles.ts` at the bar level for shell chrome (root container, backdrop, shared paddings). |
+| Behavior | `hooks/use-<feature>/` | Reusable logic: `useFeature.ts`, `index.ts`; optional `constants.ts`, `types.ts`. |
+| Global state | `store/` | MobX stores (`makeAutoObservable`), exported instances. |
+| I/O helpers | `lib/` | Token helpers, API clients, small pure or side-effect modules **without** React. |
+| App tokens | `constants/` | Colors and other **app-wide** tokens (e.g. `COLORS` in `constants/colors.ts`). |
+| Static files | `assets/` | Images and fonts; centralize paths/types next to assets when the project already does so. |
 
-- React components and screen files: **PascalCase** (`PostsHeader.tsx`, `PostsScreen.tsx`).
-- Hooks: **camelCase** with `use` prefix (`usePostsAnimation.ts`).
-- Route files under `app/`: follow **expo-router** conventions (kebab-case file names where used, e.g. `post-detail.tsx`).
+**Rule of thumb:** if removing a navigator would delete the UI, it belongs under **`navigation/`**; if it is generic product UI, it belongs under **`components/`**.
+
+## Adding a new screen
+
+1. Create `screens/<ScreenName>/` with **`ScreenName.tsx`** as the main view.
+2. Add **`styles.ts`** with `StyleSheet.create`. Screen-only layout numbers (padding, header offsets) go in **`constants.ts`** in the **same** folder, not in hook `constants.ts` unless they are animation-only.
+3. Add **`types.ts`** only when the screen exports props or shared shapes worth naming.
+4. Add **`index.ts`** that re-exports the screen (and types if needed).
+5. Wire **`screens/index.ts`** if the repo uses a central screen barrel.
+6. Add or update a file under **`app/`** that only connects the route to the screen (and params typing if used).
+
+## Adding a new route (`app/`)
+
+- File names: **kebab-case** where the router uses file names (e.g. `post-detail.tsx`).
+- Group authenticated vs public flows with route groups `(private)/`, `(public)/`, etc., consistent with existing layouts.
+- Keep **`app/_layout.tsx`** responsible for global shell concerns (e.g. one-time Reanimated import, root providers), not feature-specific markup.
+
+## Adding a reusable component (`components/`)
+
+1. Folder: **`components/<domain>/`** (domain = short kebab or single word matching existing areas: `brand`, `input`, `buttons`, `posts-intro`, …).
+2. Files (typical):
+   - **`ComponentName.tsx`** — functional component; **default export** when the folder barrel re-exports a single main component.
+   - **`types.ts`** — **`export interface ComponentNameProps`** (and other object shapes as interfaces).
+   - **`styles.ts`** — `StyleSheet.create`; colors/spacing **local** to this surface unless they are app-wide (`constants/colors.ts`) or shared as a named constant outside styles.
+   - **`constants.ts`** — optional; only for values **shared outside** `styles.ts` (e.g. sizes consumed by a hook or another module). Do not duplicate magic numbers across files.
+   - **`index.ts`** — re-export public API.
+3. Register the public export in **`components/index.ts`** when adding a new top-level domain or exporting through the aggregate barrel.
+
+## Adding navigator-specific UI (`navigation/`)
+
+1. Prefer **`navigation/bars/<bar-name>/`** (or the nearest existing navigator folder) for tab/stack chrome.
+2. Subcomponents: **`navigation/.../components/<subfolder>/`** mirroring `components/`: `SubComponent.tsx`, `styles.ts`, `types.ts`, `index.ts`.
+3. Shell layout shared by the bar (root flex, header strip, full-screen overlays): **`styles.ts`** next to the bar component (e.g. `styles.root`, `styles.brandHeader`, `styles.splashBackdrop`), with paddings aligned to **`constants.ts`** beside the bar if those numbers are reused in layout math.
+
+## Adding a hook (`hooks/`)
+
+1. Folder: **`hooks/use-<feature>/`** (kebab-case).
+2. **`useFeature.ts`** — **`camelCase`** file name with `use` prefix.
+3. **`constants.ts`** — **only** animation timings, curves, progress thresholds, and other **non-layout** tuning for that hook. Do not put RN layout constants here unless they exist solely for animation math.
+4. **`index.ts`** — export the hook and any intentional public constants/types.
+5. Register in **`hooks/index.ts`** when the project uses a central hook barrel.
+
+If two features must share **one** number (e.g. logo slot size and animation), define it **once** in the owning **`components/<domain>/constants.ts`** and import from the hook; do not copy literals.
+
+## Store and `lib/`
+
+- **`store/`**: one store per file or cohesive module; observable fields and actions; no JSX.
+- **`lib/`**: persistence, parsing, thin API wrappers — **no** React imports.
 
 ## TypeScript
 
-- Prefer **`export interface`** for object shapes (props, screen/hook params, models). Use **`type`** only when an interface is insufficient (unions, conditional/mapped types, `typeof`/`keyof` patterns).
-- Use `export type { SomeInterface }` in barrels only for type-only re-exports when needed.
+- Prefer **`export interface`** for object shapes (props, models, options).
+- Use **`type`** for unions, mapped/conditional types, `typeof` / `keyof` patterns, or when an interface is insufficient.
+- Use **`export type { … }`** in barrels for type-only re-exports when needed.
 
-## Comments
+## Naming
 
-- Do not add `//`, `/* */`, or JSDoc in hand-written source. Exceptions: generated or vendor files you must not edit (`expo-env.d.ts`, `node_modules`, lockfiles).
+- React components and screen files: **PascalCase**.
+- Hooks: **camelCase**, **`use` + name** (`usePostsAnimation.ts`).
+- Hook folders: **kebab-case** (`use-posts-animation/`).
+- Route files under `app/`: follow **expo-router** conventions (often kebab-case file names).
 
-## Constants
+## Constants (single source of truth)
 
-- **Screen layout** (horizontal padding, header top padding): `screens/<Screen>/constants.ts` — values consumed by the screen and its `styles.ts` / router entry.
-- **Component layout** shared with animation (e.g. header logo slot size): `components/.../constants.ts` — keep in sync with any hook that reads the same value (e.g. `HEADER_LOGO_SIZE` + `usePostsAnimation`).
-- **Animation tuning** (durations, intro progress thresholds): `hooks/<feature>/constants.ts` only — not mixed with RN `StyleSheet` concerns.
+- **Screen layout** (horizontal padding, safe-area-related offsets for that screen): `screens/<Screen>/constants.ts`.
+- **Component layout** shared with animation or other modules: `components/<domain>/constants.ts` — one definition, imported elsewhere.
+- **Animation-only** numbers: `hooks/use-<feature>/constants.ts` — not mixed into unrelated `StyleSheet` files.
 
 ## Styles
 
-- Use **`StyleSheet.create`** in colocated `styles.ts`. Keep colors/spacing that belong to one surface in that file unless they are reused across files (then promote to the nearest `constants.ts`).
+- Use **`StyleSheet.create`** in colocated **`styles.ts`** next to the component or screen.
+- Promote colors to **`constants/colors.ts`** when reused broadly; keep one-off colors in the local `styles.ts` unless the design system already lists them.
 
-## Components
+## Components API
 
-- Prefer **functional components**; default export for leaf components when the folder barrel re-exports a name (match existing `PostsHeader` / `PostsScreen` pattern).
-- Props: single `types.ts` with `export interface …Props`.
+- Prefer **functional components**.
+- Props: single **`types.ts`** per folder with **`export interface …Props`**.
 
-## Readability
+## Comments
 
-- Small, focused files; avoid unrelated drive-by edits; mirror existing import order and formatting; run **Organize Imports** / ESLint fixes on save when using the repo `.vscode/settings.json`.
+- Do not add `//`, `/* */`, or JSDoc in hand-written source. Exceptions: generated or vendor files you must not edit.
+
+## Readability and edits
+
+- Small, focused files; **no** unrelated drive-by refactors in the same change as a feature.
+- Match existing **import order** and formatting; run **ESLint** / organize imports when the repo configures it.
+
+## New-feature checklist
+
+- [ ] Chosen the correct **layer** (`app` vs `screens` vs `components` vs `navigation` vs `hooks`).
+- [ ] **`styles.ts`** colocated; layout numbers in **screen** or **component** `constants.ts`, animation numbers in **hook** `constants.ts`.
+- [ ] **`export interface`** for props; **`@/`** imports across boundaries.
+- [ ] Barrels updated (`components/index.ts`, `screens/index.ts`, `hooks/index.ts`) where the project already aggregates.
+- [ ] `npm run lint` (and typecheck if you use it) passes.
