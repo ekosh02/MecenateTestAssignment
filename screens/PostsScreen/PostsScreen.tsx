@@ -5,7 +5,7 @@ import {
   PostsListFooter,
 } from "@/components";
 import { COLORS } from "@/constants/colors";
-import { fetchPosts, type Post } from "@/lib/posts-api";
+import { fetchPosts } from "@/lib/posts-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import {
@@ -16,13 +16,7 @@ import {
 } from "react-native";
 import { PAGE_SIZE, SKELETON_PLACEHOLDER_COUNT } from "./constants";
 import { styles } from "./styles";
-
-type SkeletonRow = { kind: "skeleton"; id: string };
-
-type FeedRow = Post | SkeletonRow;
-
-const isSkeletonRow = (item: FeedRow): item is SkeletonRow =>
-  "kind" in item && item.kind === "skeleton";
+import { type FeedRow, isSkeletonRow } from "./types";
 
 const PostsScreen = () => {
   const query = useInfiniteQuery({

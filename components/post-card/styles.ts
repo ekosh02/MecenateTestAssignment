@@ -1,3 +1,4 @@
+import { COLORS } from "@/constants/colors";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -12,17 +13,88 @@ export const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingHorizontal: 13,
   },
-  cover: {
+  coverFrame: {
     width: "100%",
+    overflow: "hidden",
     backgroundColor: "#E5E7EB",
   },
-  title: {
-    fontSize: 17,
+  coverImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  blurAbs: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  paidCoverOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  paidCoverInner: {
+    width: "100%",
+    maxWidth: 288,
+    alignItems: "center",
+    gap: 16,
+  },
+  paidCoverIconOuter: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: COLORS.PRIMARY,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paidCoverIconInner: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paidCoverIconGlyph: {
+    fontSize: 20,
     fontWeight: "700",
-    color: "#111827",
+    color: COLORS.PRIMARY,
+  },
+  paidCoverTexts: {
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "stretch",
+  },
+  paidCoverLine1: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.45)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
+  paidCoverLine2: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#FFFFFF",
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.45)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
+  paidCoverButton: {
+    alignSelf: "stretch",
+    borderRadius: 999,
+  },
+  titleBlock: {
     marginTop: 12,
     marginBottom: 8,
     paddingHorizontal: 13,
+    position: "relative",
+    overflow: "hidden",
+  },
+  titleText: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#111827",
   },
   avatar: {
     width: 42,
@@ -37,12 +109,16 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#374151",
   },
-  preview: {
+  previewBlock: {
+    marginBottom: 8,
+    paddingHorizontal: 13,
+    position: "relative",
+    overflow: "hidden",
+  },
+  previewText: {
     fontSize: 14,
     lineHeight: 20,
     color: "#6B7280",
-    marginBottom: 8,
-    paddingHorizontal: 13,
   },
   meta: {
     flexDirection: "row",

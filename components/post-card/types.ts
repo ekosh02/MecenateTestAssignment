@@ -5,6 +5,7 @@ export interface PostCardProps {
   post: Post;
   coverAspectRatio: number;
   coverImageRef?: ImageRef;
+  onDonatePress?: () => void;
 }
 
 export interface PostListRowProps {
