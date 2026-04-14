@@ -42,7 +42,7 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }} />
         </AuthGate>
       </QueryClientProvider>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
     </>
   );
 }
