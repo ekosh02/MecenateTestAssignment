@@ -1,6 +1,6 @@
 import { BRAND_LOGO_TAB_HEADER_SLOT_SIZE } from "@/components/brand/constants";
 import { useCallback, useEffect, useState } from "react";
-import { LayoutChangeEvent, useWindowDimensions } from "react-native";
+import { useWindowDimensions, type LayoutChangeEvent } from "react-native";
 import {
   Easing,
   cancelAnimation,

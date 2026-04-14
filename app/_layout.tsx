@@ -19,12 +19,11 @@ export default function RootLayout() {
     let active = true;
     void (async () => {
       const token = await getSecureAuthToken();
-      if (active) {
-        authStore.setToken(token);
+      if (!active) {
+        return;
       }
-      if (active) {
-        setHydrated(true);
-      }
+      authStore.setToken(token);
+      setHydrated(true);
       void SplashScreen.hideAsync();
     })();
     return () => {

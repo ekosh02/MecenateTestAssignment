@@ -5,7 +5,12 @@ import {
   PostsListFooter,
 } from "@/components";
 import { COLORS } from "@/constants/colors";
-import { fetchPosts } from "@/lib/posts-api";
+import {
+  POSTS_FEED_PAGE_SIZE,
+  POSTS_FEED_QUERY_KEY,
+  POSTS_FEED_TIER,
+  fetchPosts,
+} from "@/lib/posts-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import {
@@ -14,19 +19,19 @@ import {
   RefreshControl,
   View,
 } from "react-native";
-import { PAGE_SIZE, SKELETON_PLACEHOLDER_COUNT } from "./constants";
+import { SKELETON_PLACEHOLDER_COUNT } from "./constants";
 import { styles } from "./styles";
 import { type FeedRow, isSkeletonRow } from "./types";
 
 const PostsScreen = () => {
   const query = useInfiniteQuery({
-    queryKey: ["posts", "feed", { limit: PAGE_SIZE, tier: "free" as const }],
+    queryKey: [...POSTS_FEED_QUERY_KEY],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       fetchPosts({
-        limit: PAGE_SIZE,
+        limit: POSTS_FEED_PAGE_SIZE,
         cursor: pageParam,
-        tier: "free",
+        tier: POSTS_FEED_TIER,
       }),
     getNextPageParam: (last) =>
       last.data.hasMore && last.data.nextCursor

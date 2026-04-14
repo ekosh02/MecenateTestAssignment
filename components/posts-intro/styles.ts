@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const postsIntroOverlayStyles = StyleSheet.create({
+export const styles = StyleSheet.create({
   root: {
     position: "absolute",
     zIndex: 10,

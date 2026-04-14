@@ -1,6 +1,14 @@
 import { POSTS_API_PATH } from "@/constants/api";
 import { apiJson } from "@/lib/api";
 
+export const POSTS_FEED_PAGE_SIZE = 10;
+export const POSTS_FEED_TIER = "free" as const;
+export const POSTS_FEED_QUERY_KEY = [
+  "posts",
+  "feed",
+  { limit: POSTS_FEED_PAGE_SIZE, tier: POSTS_FEED_TIER },
+] as const;
+
 export interface PostAuthor {
   id: string;
   username: string;
@@ -25,12 +33,12 @@ export interface Post {
   createdAt: string;
 }
 
-export type GetPostsParams = {
+export interface GetPostsParams {
   limit?: number;
   cursor?: string;
   tier?: "free" | "paid";
   simulate_error?: boolean;
-};
+}
 
 export interface PostsResponse {
   ok?: boolean;

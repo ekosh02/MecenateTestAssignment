@@ -7,6 +7,5 @@ export * from "./input";
 export * from "./post-card";
 export * from "./post-meta-row";
 export * from "./posts-feed-error";
-export * from "./posts-feed-loading";
 export * from "./posts-list-footer";
 export * from "./posts-intro";

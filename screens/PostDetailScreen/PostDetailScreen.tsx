@@ -15,6 +15,7 @@ import { normalizeRouteParam } from "@/lib/normalize-route-param";
 import {
   findPostInFeedPages,
   type Post,
+  POSTS_FEED_QUERY_KEY,
   type PostsResponse,
 } from "@/lib/posts-api";
 import { Ionicons } from "@expo/vector-icons";
@@ -32,7 +33,7 @@ import {
   type TextLayoutEventData,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { POST_DETAIL_SAFE_TOP_EXTRA, POSTS_FEED_QUERY_KEY } from "./constants";
+import { POST_DETAIL_SAFE_TOP_EXTRA } from "./constants";
 import { styles } from "./styles";
 
 const PostDetailScreen = () => {

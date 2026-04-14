@@ -74,15 +74,11 @@ const AuthScreen = () => {
     sessionMutation.mutate(trimmed);
   };
 
-  const onCopySampleToken = () => {
-    void (async () => {
-      await Clipboard.setStringAsync(DEFAULT_AUTH_TOKEN);
-      if (Platform.OS !== "web") {
-        await Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success,
-        );
-      }
-    })();
+  const onCopySampleToken = async () => {
+    await Clipboard.setStringAsync(DEFAULT_AUTH_TOKEN);
+    if (Platform.OS !== "web") {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
   };
 
   return (
@@ -130,7 +126,9 @@ const AuthScreen = () => {
                 styles.copyTokenPressable,
                 pressed && { opacity: 0.75 },
               ]}
-              onPress={onCopySampleToken}
+              onPress={() => {
+                void onCopySampleToken();
+              }}
             >
               <Ionicons name="copy-outline" size={20} color={COLORS.PRIMARY} />
               <Text style={styles.copyTokenText}>Скопировать этот токен</Text>

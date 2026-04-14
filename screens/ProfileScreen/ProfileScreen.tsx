@@ -7,11 +7,9 @@ import { styles } from "./styles";
 const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
 
-  const onLogout = () => {
-    void (async () => {
-      await persistAuthToken("");
-      authStore.setToken("");
-    })();
+  const onLogout = async () => {
+    await persistAuthToken("");
+    authStore.setToken("");
   };
 
   return (
@@ -21,7 +19,9 @@ const ProfileScreen = () => {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Выйти из аккаунта"
-        onPress={onLogout}
+        onPress={() => {
+          void onLogout();
+        }}
         style={({ pressed }) => [
           styles.logoutButton,
           pressed && styles.logoutButtonPressed,
