@@ -3,12 +3,6 @@ import { COLORS } from "@/constants/colors";
 import { Platform, StyleSheet } from "react-native";
 import { SCREEN_HORIZONTAL_PADDING } from "./constants";
 
-const TOKEN_MONO_FONT = Platform.select({
-  ios: "Menlo",
-  android: "monospace",
-  default: "monospace",
-});
-
 const CARD_SHADOW = Platform.select({
   ios: {
     shadowColor: "#1E1B4B",
@@ -94,43 +88,6 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#374151",
     marginBottom: 10,
-  },
-  tokenCopyCard: {
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#EDE9FE",
-    backgroundColor: "#FAF5FF",
-  },
-  tokenCopyTitle: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: COLORS.PRIMARY,
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
-    marginBottom: 8,
-  },
-  tokenCopyValue: {
-    fontSize: 12,
-    lineHeight: 18,
-    color: "#1F2937",
-    fontFamily: TOKEN_MONO_FONT,
-    marginBottom: 12,
-  },
-  copyTokenPressable: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    gap: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    marginHorizontal: -4,
-    borderRadius: 8,
-  },
-  copyTokenText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: COLORS.PRIMARY,
   },
   primaryButton: {
     marginTop: 22,

@@ -3,19 +3,16 @@ import {
   Input,
   PostsIntroLogoOverlay,
   PrimaryButton,
+  TokenCopyCard,
 } from "@/components";
 import { POSTS_API_PATH } from "@/constants/api";
-import { COLORS } from "@/constants/colors";
 import { useAuthLogoIntro } from "@/hooks";
 import { apiFetch } from "@/lib/api";
 import { persistAuthToken } from "@/lib/auth-secure-token";
 import { authStore } from "@/store";
-import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
-import * as Clipboard from "expo-clipboard";
-import * as Haptics from "expo-haptics";
 import { useEffect, useRef, useState } from "react";
-import { Platform, Pressable, Text, type TextInput, View } from "react-native";
+import { Text, type TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -74,13 +71,6 @@ const AuthScreen = () => {
     sessionMutation.mutate(trimmed);
   };
 
-  const onCopySampleToken = async () => {
-    await Clipboard.setStringAsync(DEFAULT_AUTH_TOKEN);
-    if (Platform.OS !== "web") {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-  };
-
   return (
     <KeyboardAwareScrollView
       style={styles.root}
@@ -116,24 +106,7 @@ const AuthScreen = () => {
         </Text>
 
         <View style={styles.card}>
-          <View style={styles.tokenCopyCard}>
-            <Text style={styles.tokenCopyTitle}>Тестовый токен</Text>
-            <Text selectable style={styles.tokenCopyValue}>
-              {DEFAULT_AUTH_TOKEN}
-            </Text>
-            <Pressable
-              style={({ pressed }) => [
-                styles.copyTokenPressable,
-                pressed && { opacity: 0.75 },
-              ]}
-              onPress={() => {
-                void onCopySampleToken();
-              }}
-            >
-              <Ionicons name="copy-outline" size={20} color={COLORS.PRIMARY} />
-              <Text style={styles.copyTokenText}>Скопировать этот токен</Text>
-            </Pressable>
-          </View>
+          <TokenCopyCard title="Тестовый токен" value={DEFAULT_AUTH_TOKEN} />
           <Text style={styles.label}>Токен</Text>
           <Input
             ref={inputRef}

@@ -1,21 +1,21 @@
+import { TokenCopyCard } from "@/components";
 import { persistAuthToken } from "@/lib/auth-secure-token";
 import { authStore } from "@/store";
-import { Pressable, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { observer } from "mobx-react-lite";
+import { Pressable, ScrollView, Text } from "react-native";
 import { styles } from "./styles";
 
-const ProfileScreen = () => {
-  const insets = useSafeAreaInsets();
-
+const ProfileScreen = observer(function ProfileScreen() {
   const onLogout = async () => {
     await persistAuthToken("");
     authStore.setToken("");
   };
 
   return (
-    <View
-      style={[styles.screen, { paddingTop: Math.max(insets.top, 24) + 8 }]}
-    >
+    <ScrollView style={styles.screen}>
+      <TokenCopyCard title="Токен доступа" value={authStore.token} />
+
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Выйти из аккаунта"
@@ -27,10 +27,11 @@ const ProfileScreen = () => {
           pressed && styles.logoutButtonPressed,
         ]}
       >
+        <Ionicons name="log-out-outline" size={22} color="#B91C1C" />
         <Text style={styles.logoutLabel}>Выйти из аккаунта</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
-};
+});
 
 export default ProfileScreen;
