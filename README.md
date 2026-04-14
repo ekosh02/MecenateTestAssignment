@@ -1,4 +1,10 @@
-# Запуск
+# Запись экрана этого проекта
+
+Ниже — демонстрация приложения в действии.
+
+<img src="readme-data/screen-record.gif" alt="Запись экрана" width="200" />
+
+## Запуск
 
 ```bash
 npm i
@@ -24,3 +30,4 @@ npm start
 | `lib/` | API, secure store, утилиты без React. |
 | `constants/` | Общие токены (цвета, URL API). |
 | `assets/` | Картинки, иконки. |
+| `readme-data/` | Материалы только для README (запись экрана и т.п.). |
