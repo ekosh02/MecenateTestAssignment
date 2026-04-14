@@ -1,13 +1,18 @@
 import { COLORS } from "@/constants/colors";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import Animated, {
+  cancelAnimation,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { PRIMARY_BUTTON_ENABLE_TRANSITION_MS } from "./constants";
+import {
+  PRIMARY_BUTTON_ENABLE_TRANSITION_MS,
+  PRIMARY_BUTTON_PRESS_COLOR_IN_MS,
+  PRIMARY_BUTTON_PRESS_COLOR_OUT_MS,
+} from "./constants";
 import { styles } from "./styles";
 import type { PrimaryButtonProps } from "./types";
 
@@ -20,35 +25,76 @@ const PrimaryButton = ({
   loading = false,
   style,
 }: PrimaryButtonProps) => {
-  const blocked = disabled || loading;
-  const dimmed = disabled && !loading;
-  const enabledProgress = useSharedValue(dimmed ? 0 : 1);
+  const isPressDisabled = disabled || loading;
+  const isMutedSurface = disabled && !loading;
+
+  const enabledBlend = useSharedValue(isMutedSurface ? 0 : 1);
+  const pressBlend = useSharedValue(0);
 
   useEffect(() => {
-    enabledProgress.value = withTiming(dimmed ? 0 : 1, {
+    enabledBlend.value = withTiming(isMutedSurface ? 0 : 1, {
       duration: PRIMARY_BUTTON_ENABLE_TRANSITION_MS,
     });
-  }, [dimmed, enabledProgress]);
+  }, [enabledBlend, isMutedSurface]);
 
-  const animatedSurfaceStyle = useAnimatedStyle(() => {
-    const t = enabledProgress.value;
+  useEffect(() => {
+    if (!isPressDisabled) {
+      return;
+    }
+    cancelAnimation(pressBlend);
+    pressBlend.value = 0;
+  }, [isPressDisabled, pressBlend]);
+
+  const surfaceAnimatedStyle = useAnimatedStyle(() => {
+    const enabled = enabledBlend.value;
+    const pressed = pressBlend.value;
+
+    const backgroundAtRest = interpolateColor(
+      enabled,
+      [0, 1],
+      [COLORS.PRIMARY_MUTED, COLORS.PRIMARY],
+    );
+
+    const backgroundWhenPressed = interpolateColor(
+      enabled,
+      [0, 1],
+      [COLORS.PRIMARY_MUTED_PRESSED, COLORS.PRIMARY_PRESSED],
+    );
+
     return {
       backgroundColor: interpolateColor(
-        t,
+        pressed,
         [0, 1],
-        [COLORS.PRIMARY_MUTED, COLORS.PRIMARY],
+        [backgroundAtRest, backgroundWhenPressed],
       ),
     };
   });
+
+  const runPressIn = useCallback(() => {
+    if (isPressDisabled) {
+      return;
+    }
+    pressBlend.value = withTiming(1, {
+      duration: PRIMARY_BUTTON_PRESS_COLOR_IN_MS,
+    });
+  }, [isPressDisabled, pressBlend]);
+
+  const runPressOut = useCallback(() => {
+    pressBlend.value = withTiming(0, {
+      duration: PRIMARY_BUTTON_PRESS_COLOR_OUT_MS,
+    });
+  }, [pressBlend]);
 
   return (
     <AnimatedPressable
       accessibilityLabel={title}
       accessibilityRole="button"
-      accessibilityState={{ disabled: blocked, busy: loading }}
-      disabled={blocked}
+      accessibilityState={{ disabled: isPressDisabled, busy: loading }}
+      disabled={isPressDisabled}
       onPress={onPress}
-      style={[styles.pressable, animatedSurfaceStyle, style]}
+      onPressIn={runPressIn}
+      onPressOut={runPressOut}
+      style={[styles.pressable, surfaceAnimatedStyle, style]}
     >
       <View style={styles.contentSlot}>
         {loading ? (
