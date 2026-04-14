@@ -1,3 +1,4 @@
+import { styles as postMetaRowStyles } from "@/components/post-meta-row/styles";
 import { View } from "react-native";
 import { styles } from "./styles";
 
@@ -11,7 +12,7 @@ const PostCardSkeleton = () => (
     <View style={styles.skeletonTitleLine} />
     <View style={styles.skeletonPreviewLine} />
     <View style={[styles.skeletonPreviewLine, styles.skeletonPreviewLineShort]} />
-    <View style={styles.meta}>
+    <View style={[postMetaRowStyles.meta, { paddingHorizontal: 13 }]}>
       <View style={styles.skeletonMetaPill} />
       <View style={styles.skeletonMetaPill} />
     </View>

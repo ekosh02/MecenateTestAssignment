@@ -1,0 +1,1 @@
+export const HEADER_HORIZONTAL_PADDING = 20;

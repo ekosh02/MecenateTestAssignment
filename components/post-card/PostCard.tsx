@@ -1,5 +1,5 @@
-import { CommentIcon, LikeIcon } from "@/assets/icons";
 import { PrimaryButton } from "@/components/buttons";
+import { PostMetaRow } from "@/components/post-meta-row";
 import { COLORS } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -99,18 +99,12 @@ const PostCard = ({
           />
         ) : null}
       </View>
-      <View style={styles.meta}>
-        <View style={[styles.metaItem, post.isLiked && styles.metaItemLiked]}>
-          <LikeIcon filled={post.isLiked} />
-          <Text style={[styles.metaText, post.isLiked && styles.metaTextLiked]}>
-            {post.likesCount}
-          </Text>
-        </View>
-        <View style={styles.metaItem}>
-          <CommentIcon />
-          <Text style={styles.metaText}>{post.commentsCount}</Text>
-        </View>
-      </View>
+      <PostMetaRow
+        likesCount={post.likesCount}
+        commentsCount={post.commentsCount}
+        isLiked={post.isLiked}
+        style={{ paddingHorizontal: 13 }}
+      />
     </View>
   );
 };

@@ -120,31 +120,6 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
     color: "#6B7280",
   },
-  meta: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
-    paddingHorizontal: 13,
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#F0F2F5",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-  },
-  metaItemLiked: {
-    backgroundColor: "#FF2B75",
-  },
-  metaText: {
-    fontSize: 13,
-    color: "#6B7280",
-  },
-  metaTextLiked: {
-    color: "#FFFFFF",
-  },
   skeletonAuthorLine: {
     flex: 1,
     height: 14,

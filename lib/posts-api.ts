@@ -66,3 +66,19 @@ export async function fetchPosts(params: GetPostsParams): Promise<PostsResponse>
   }
   return body;
 }
+
+export function findPostInFeedPages(
+  pages: PostsResponse[] | undefined,
+  id: string,
+): Post | undefined {
+  if (pages === undefined) {
+    return undefined;
+  }
+  for (const page of pages) {
+    const found = page.data.posts.find((p) => p.id === id);
+    if (found !== undefined) {
+      return found;
+    }
+  }
+  return undefined;
+}
