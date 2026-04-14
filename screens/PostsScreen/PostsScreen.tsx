@@ -10,8 +10,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import {
   FlatList,
-  RefreshControl,
   type ListRenderItem,
+  RefreshControl,
   View,
 } from "react-native";
 import { PAGE_SIZE, SKELETON_PLACEHOLDER_COUNT } from "./constants";
@@ -47,9 +47,7 @@ const PostsScreen = () => {
 
   const showFeedSkeleton =
     query.isPending ||
-    (!query.isPending &&
-      query.isFetching &&
-      !query.isFetchingNextPage);
+    (!query.isPending && query.isFetching && !query.isFetchingNextPage);
 
   const listData: FeedRow[] = showFeedSkeleton ? skeletonRows : posts;
 
@@ -88,16 +86,13 @@ const PostsScreen = () => {
   }, [query.refetch]);
 
   const refreshing =
-    !query.isPending &&
-    query.isFetching &&
-    !query.isFetchingNextPage;
+    !query.isPending && query.isFetching && !query.isFetchingNextPage;
 
   if (query.isError) {
     return (
-      <PostsFeedError
-        error={query.error}
-        onRetry={() => void query.refetch()}
-      />
+      <View style={styles.screen}>
+        <PostsFeedError onRetry={() => void query.refetch()} />
+      </View>
     );
   }
 

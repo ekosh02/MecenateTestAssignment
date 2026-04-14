@@ -1,4 +1,5 @@
 export interface PostsFeedErrorProps {
-  error: unknown;
   onRetry: () => void;
+  message?: string;
+  applyTopSafeArea?: boolean;
 }

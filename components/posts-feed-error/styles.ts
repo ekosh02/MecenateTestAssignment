@@ -1,23 +1,30 @@
-import { COLORS } from "@/constants/colors";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
+    width: "100%",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
+    paddingHorizontal: 28,
+  },
+  logo: {
+    marginBottom: 28,
   },
   message: {
-    fontSize: 15,
-    color: "#B91C1C",
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#111827",
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: 28,
+    lineHeight: 24,
+    paddingHorizontal: 8,
   },
-  retry: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.PRIMARY,
+  retryButton: {
+    alignSelf: "stretch",
+    maxWidth: 400,
+    borderRadius: 28,
+    paddingVertical: 16,
   },
 });

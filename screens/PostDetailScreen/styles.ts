@@ -1,4 +1,3 @@
-import { COLORS } from "@/constants/colors";
 import { StyleSheet } from "react-native";
 import { POST_DETAIL_SECTION_V_SPACING } from "./constants";
 
@@ -55,18 +54,5 @@ export const styles = StyleSheet.create({
   },
   metaRow: {
     marginBottom: POST_DETAIL_SECTION_V_SPACING,
-  },
-  emptyWrap: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    gap: 16,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#374151",
-    textAlign: "center",
   },
 });

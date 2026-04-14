@@ -1,16 +1,42 @@
-import { Pressable, Text, View } from "react-native";
+import { IMAGES } from "@/assets/images";
+import { PrimaryButton } from "@/components/buttons";
+import { Image } from "expo-image";
+import { Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  POSTS_FEED_ERROR_DEFAULT_MESSAGE,
+  POSTS_FEED_ERROR_LOGO_MAX_WIDTH,
+} from "./constants";
 import { styles } from "./styles";
 import type { PostsFeedErrorProps } from "./types";
 
-const PostsFeedError = ({ error, onRetry }: PostsFeedErrorProps) => (
-  <View style={styles.root}>
-    <Text style={styles.message}>
-      {error instanceof Error ? error.message : "Ошибка загрузки"}
-    </Text>
-    <Pressable onPress={onRetry}>
-      <Text style={styles.retry}>Повторить</Text>
-    </Pressable>
-  </View>
-);
+const PostsFeedError = ({
+  onRetry,
+  message,
+  applyTopSafeArea = true,
+}: PostsFeedErrorProps) => {
+  const insets = useSafeAreaInsets();
+  const text = message ?? POSTS_FEED_ERROR_DEFAULT_MESSAGE;
+  const paddingTop = applyTopSafeArea ? insets.top : 0;
+  const paddingBottom = insets.bottom + 16;
+
+  return (
+    <View style={[styles.root, { paddingTop, paddingBottom }]}>
+      <Image
+        source={IMAGES.LOGO}
+        style={[
+          styles.logo,
+          {
+            width: POSTS_FEED_ERROR_LOGO_MAX_WIDTH,
+            height: POSTS_FEED_ERROR_LOGO_MAX_WIDTH,
+          },
+        ]}
+        contentFit="contain"
+      />
+      <Text style={styles.message}>{text}</Text>
+      <PrimaryButton title="Повторить" onPress={onRetry} style={styles.retryButton} />
+    </View>
+  );
+};
 
 export default PostsFeedError;

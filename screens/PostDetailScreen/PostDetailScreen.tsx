@@ -3,6 +3,7 @@ import {
   DetailBody,
   Header,
   PostMetaRow,
+  PostsFeedError,
 } from "@/components";
 import {
   COVER_IMAGE_FALLBACK_ASPECT_RATIO,
@@ -10,12 +11,12 @@ import {
 } from "@/components/post-card/constants";
 import { COLORS } from "@/constants/colors";
 import { usePostCoverImage } from "@/hooks/use-post-cover-image";
+import { normalizeRouteParam } from "@/lib/normalize-route-param";
 import {
   findPostInFeedPages,
   type Post,
   type PostsResponse,
 } from "@/lib/posts-api";
-import { normalizeRouteParam } from "@/lib/normalize-route-param";
 import { Ionicons } from "@expo/vector-icons";
 import type { InfiniteData } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -76,12 +77,20 @@ const PostDetailScreen = () => {
   if (post === undefined) {
     return (
       <View
-        style={[styles.screen, { paddingTop: insets.top + POST_DETAIL_SAFE_TOP_EXTRA }]}
+        style={[
+          styles.screen,
+          { paddingTop: insets.top + POST_DETAIL_SAFE_TOP_EXTRA },
+        ]}
       >
         <Header title="Пост" showLogo={false} onBackPress={handleBack} />
-        <View style={styles.emptyWrap}>
-          <Text style={styles.emptyTitle}>Пост не найден</Text>
-        </View>
+        <PostsFeedError
+          applyTopSafeArea={false}
+          onRetry={() => {
+            void queryClient.invalidateQueries({
+              queryKey: [...POSTS_FEED_QUERY_KEY],
+            });
+          }}
+        />
       </View>
     );
   }
@@ -95,7 +104,10 @@ const PostDetailScreen = () => {
 
   return (
     <View
-      style={[styles.screen, { paddingTop: insets.top + POST_DETAIL_SAFE_TOP_EXTRA }]}
+      style={[
+        styles.screen,
+        { paddingTop: insets.top + POST_DETAIL_SAFE_TOP_EXTRA },
+      ]}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -112,7 +124,11 @@ const PostDetailScreen = () => {
             {post.author.displayName}
           </Text>
           {post.author.isVerified ? (
-            <Ionicons name="checkmark-circle" size={20} color={COLORS.PRIMARY} />
+            <Ionicons
+              name="checkmark-circle"
+              size={20}
+              color={COLORS.PRIMARY}
+            />
           ) : null}
         </View>
         <View style={[styles.coverFrame, { aspectRatio: coverAspectRatio }]}>
