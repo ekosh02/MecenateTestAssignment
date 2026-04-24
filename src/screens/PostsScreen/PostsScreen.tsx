@@ -52,7 +52,7 @@ const PostsScreen = () => {
 
   const showFeedSkeleton =
     query.isPending ||
-    (!query.isPending && query.isFetching && !query.isFetchingNextPage);
+    (query.isRefetching && !query.isFetchingNextPage);
 
   const listData: FeedRow[] = showFeedSkeleton ? skeletonRows : posts;
 
@@ -90,8 +90,7 @@ const PostsScreen = () => {
     void query.refetch();
   }, [query.refetch]);
 
-  const refreshing =
-    !query.isPending && query.isFetching && !query.isFetchingNextPage;
+  const refreshing = query.isRefetching;
 
   if (query.isError) {
     return (
