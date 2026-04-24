@@ -3,10 +3,7 @@ import { PrimaryButton } from "@/src/components/buttons";
 import { Image } from "expo-image";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  POSTS_FEED_ERROR_DEFAULT_MESSAGE,
-  POSTS_FEED_ERROR_LOGO_MAX_WIDTH,
-} from "./constants";
+import { POSTS_FEED_ERROR_LOGO_MAX_WIDTH } from "./constants";
 import { styles } from "./styles";
 import type { PostsFeedErrorProps } from "./types";
 
@@ -16,7 +13,7 @@ const PostsFeedError = ({
   applyTopSafeArea = true,
 }: PostsFeedErrorProps) => {
   const insets = useSafeAreaInsets();
-  const text = message ?? POSTS_FEED_ERROR_DEFAULT_MESSAGE;
+  const text = message ?? "Не удалось загрузить публикации";
   const paddingTop = applyTopSafeArea ? insets.top : 0;
   const paddingBottom = insets.bottom + 16;
 
