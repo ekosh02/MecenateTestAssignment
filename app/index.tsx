@@ -1,4 +1,4 @@
-import { authStore } from "@/store";
+import { authStore } from "@/src/store";
 import { Redirect } from "expo-router";
 import { observer } from "mobx-react-lite";
 

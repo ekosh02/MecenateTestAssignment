@@ -1,7 +1,6 @@
-import { AuthGate } from "@/components";
-import { getSecureAuthToken } from "@/lib/auth-secure-token";
-import { createQueryClient } from "@/lib/query-client";
-import { authStore } from "@/store";
+import { AuthGate } from "@/src/components";
+import { createQueryClient, getSecureAuthToken } from "@/src/lib";
+import { authStore } from "@/src/store";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";

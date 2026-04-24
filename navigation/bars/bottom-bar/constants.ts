@@ -1,3 +1,0 @@
-export { HEADER_HORIZONTAL_PADDING as BOTTOM_BAR_BRAND_HEADER_HORIZONTAL_PADDING } from "@/components/header/constants";
-
-export const BOTTOM_BAR_BRAND_HEADER_TOP_OFFSET = 0;

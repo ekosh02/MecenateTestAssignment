@@ -1,3 +1,3 @@
-import { AuthScreen } from "@/screens";
+import { AuthScreen } from "@/src/screens";
 
 export default AuthScreen;
