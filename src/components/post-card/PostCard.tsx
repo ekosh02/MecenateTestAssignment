@@ -20,6 +20,7 @@ const PostCard = ({
   coverImageRef,
   onDonatePress,
   onLikePress,
+  onCommentPress,
   isLikePending,
 }: PostCardProps) => {
   const isPaid = post.tier === "paid";
@@ -106,6 +107,7 @@ const PostCard = ({
         commentsCount={post.commentsCount}
         isLiked={post.isLiked}
         onLikePress={onLikePress}
+        onCommentPress={onCommentPress}
         isLikePending={isLikePending}
         style={{ paddingHorizontal: 13 }}
       />

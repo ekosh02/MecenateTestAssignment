@@ -6,7 +6,12 @@ import PostCardSkeleton from "./PostCardSkeleton";
 import { COVER_IMAGE_FALLBACK_ASPECT_RATIO } from "./constants";
 import type { PostListRowProps } from "./types";
 
-const PostListRow = ({ post, onLikePress, isLikePending }: PostListRowProps) => {
+const PostListRow = ({
+  post,
+  onLikePress,
+  onCommentPress,
+  isLikePending,
+}: PostListRowProps) => {
   const cover = usePostCoverImage(post.coverUrl);
 
   if (cover.status === "loading") {
@@ -21,6 +26,9 @@ const PostListRow = ({ post, onLikePress, isLikePending }: PostListRowProps) => 
         onLikePress={
           onLikePress === undefined ? undefined : () => onLikePress(post.id)
         }
+        onCommentPress={
+          onCommentPress === undefined ? undefined : () => onCommentPress(post.id)
+        }
         isLikePending={isLikePending}
       />
     ) : (
@@ -30,6 +38,9 @@ const PostListRow = ({ post, onLikePress, isLikePending }: PostListRowProps) => 
         coverImageRef={cover.coverImage}
         onLikePress={
           onLikePress === undefined ? undefined : () => onLikePress(post.id)
+        }
+        onCommentPress={
+          onCommentPress === undefined ? undefined : () => onCommentPress(post.id)
         }
         isLikePending={isLikePending}
       />

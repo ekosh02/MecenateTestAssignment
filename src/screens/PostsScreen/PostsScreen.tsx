@@ -27,6 +27,7 @@ import {
   RefreshControl,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import { SKELETON_PLACEHOLDER_COUNT } from "./constants";
 import { styles } from "./styles";
 import { type FeedRow, isSkeletonRow } from "./types";
@@ -146,6 +147,13 @@ const PostsScreen = () => {
     [likeMutation, pendingLikeIds],
   );
 
+  const onCommentPress = useCallback((postId: string) => {
+    router.push({
+      pathname: "/(private)/post-detail",
+      params: { id: postId, focusComments: "1" },
+    });
+  }, []);
+
   const keyExtractor = useCallback((item: FeedRow) => item.id, []);
 
   const renderItem = useCallback<ListRenderItem<FeedRow>>(
@@ -156,10 +164,11 @@ const PostsScreen = () => {
         <PostListRow
           post={item as Post}
           onLikePress={onLikePress}
+          onCommentPress={onCommentPress}
           isLikePending={Boolean(pendingLikeIds[item.id])}
         />
       ),
-    [onLikePress, pendingLikeIds],
+    [onCommentPress, onLikePress, pendingLikeIds],
   );
 
   const onLoadMore = useCallback(() => {

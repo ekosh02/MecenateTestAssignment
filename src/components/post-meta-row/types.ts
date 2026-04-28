@@ -5,6 +5,7 @@ export interface PostMetaRowProps {
   commentsCount: number;
   isLiked: boolean;
   onLikePress?: () => void;
+  onCommentPress?: () => void;
   isLikePending?: boolean;
   style?: StyleProp<ViewStyle>;
 }

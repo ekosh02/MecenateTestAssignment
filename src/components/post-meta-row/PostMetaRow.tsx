@@ -17,6 +17,7 @@ const PostMetaRow = ({
   commentsCount,
   isLiked,
   onLikePress,
+  onCommentPress,
   isLikePending,
   style,
 }: PostMetaRowProps) => {
@@ -104,10 +105,18 @@ const PostMetaRow = ({
           </Animated.Text>
         </Animated.View>
       </Pressable>
-      <View style={styles.metaItem}>
-        <CommentIcon />
-        <Text style={styles.metaText}>{commentsCount}</Text>
-      </View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={(event) => {
+          event.stopPropagation();
+          onCommentPress?.();
+        }}
+      >
+        <View style={styles.metaItem}>
+          <CommentIcon />
+          <Text style={styles.metaText}>{commentsCount}</Text>
+        </View>
+      </Pressable>
     </View>
   );
 };

@@ -7,11 +7,13 @@ export interface PostCardProps {
   coverImageRef?: ImageRef;
   onDonatePress?: () => void;
   onLikePress?: () => void;
+  onCommentPress?: () => void;
   isLikePending?: boolean;
 }
 
 export interface PostListRowProps {
   post: Post;
   onLikePress?: (postId: string) => void;
+  onCommentPress?: (postId: string) => void;
   isLikePending?: boolean;
 }

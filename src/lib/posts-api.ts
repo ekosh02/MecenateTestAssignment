@@ -54,6 +54,30 @@ export interface TogglePostLikeResult {
   likesCount?: number;
 }
 
+export interface PostCommentAuthor {
+  id: string;
+  username?: string;
+  displayName: string;
+  avatarUrl?: string;
+}
+
+export interface PostComment {
+  id: string;
+  postId: string;
+  text: string;
+  createdAt: string;
+  author: PostCommentAuthor;
+}
+
+export interface PostCommentsResponse {
+  ok?: boolean;
+  data: {
+    comments: PostComment[];
+    nextCursor: string | null;
+    hasMore: boolean;
+  };
+}
+
 export function buildPostsPath(params: GetPostsParams = {}): string {
   const search = new URLSearchParams();
   if (params.limit !== undefined) {
@@ -108,6 +132,41 @@ export async function togglePostLike(postId: string): Promise<TogglePostLikeResu
   } catch {
     return {};
   }
+}
+
+export async function fetchPostComments(params: {
+  postId: string;
+  limit?: number;
+  cursor?: string;
+}): Promise<PostCommentsResponse> {
+  const search = new URLSearchParams();
+  if (params.limit !== undefined) {
+    search.set("limit", String(params.limit));
+  }
+  if (params.cursor !== undefined && params.cursor.length > 0) {
+    search.set("cursor", params.cursor);
+  }
+  const query = search.toString();
+  const path = `${POSTS_API_PATH}/${params.postId}/comments${query.length > 0 ? `?${query}` : ""}`;
+  const body = await apiJson<PostCommentsResponse>(path);
+  if (body.ok === false) {
+    throw new Error("Ответ comments: ok — false");
+  }
+  return body;
+}
+
+export async function addPostComment(params: {
+  postId: string;
+  text: string;
+}): Promise<{ comment?: PostComment }> {
+  const body = await apiJson<{ data?: { comment?: PostComment }; comment?: PostComment }>(
+    `${POSTS_API_PATH}/${params.postId}/comments`,
+    {
+      method: "POST",
+      body: JSON.stringify({ text: params.text }),
+    },
+  );
+  return { comment: body.data?.comment ?? body.comment };
 }
 
 export function findPostInFeedPages(
