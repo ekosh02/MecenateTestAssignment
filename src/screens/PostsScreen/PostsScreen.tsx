@@ -9,6 +9,7 @@ import {
   POSTS_FEED_PAGE_SIZE,
   fetchPosts,
   togglePostLike,
+  type PostDetailResponse,
   type Post,
   type PostsResponse,
 } from "@/src/lib";
@@ -162,6 +163,25 @@ const PostsScreen = () => {
           })),
         };
       });
+      queryClient.setQueryData<PostDetailResponse>(
+        ["posts", "detail", postId],
+        (cached: PostDetailResponse | undefined) => {
+          if (cached === undefined) {
+            return cached;
+          }
+          return {
+            ...cached,
+            data: {
+              ...cached.data,
+              post: {
+                ...cached.data.post,
+                isLiked,
+                likesCount,
+              },
+            },
+          };
+        },
+      );
     },
     [queryClient, queryKey],
   );

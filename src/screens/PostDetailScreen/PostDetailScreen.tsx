@@ -25,6 +25,7 @@ import {
   findPostInFeedPages,
   togglePostLike,
   updatePostLikeInFeed,
+  type PostDetailResponse,
   type Post,
   type PostComment,
   type PostsResponse,
@@ -145,6 +146,25 @@ const PostDetailScreen = () => {
         currentPost.likesCount + (nextIsLiked ? 1 : -1),
       );
       updatePostLikeInFeed(queryClient, postId, nextIsLiked, nextLikesCount);
+      queryClient.setQueryData<PostDetailResponse>(
+        ["posts", "detail", postId],
+        (cached: PostDetailResponse | undefined) => {
+          if (cached === undefined) {
+            return cached;
+          }
+          return {
+            ...cached,
+            data: {
+              ...cached.data,
+              post: {
+                ...cached.data.post,
+                isLiked: nextIsLiked,
+                likesCount: nextLikesCount,
+              },
+            },
+          };
+        },
+      );
       setIsLikePending(true);
       return { previousFeed, postId };
     },
@@ -155,12 +175,36 @@ const PostDetailScreen = () => {
           context.previousFeed,
         );
       }
+      if (id !== undefined) {
+        void queryClient.invalidateQueries({ queryKey: ["posts", "detail", id] });
+      }
     },
     onSuccess: (result, postId) => {
       if (result.isLiked === undefined || result.likesCount === undefined) {
         return;
       }
-      updatePostLikeInFeed(queryClient, postId, result.isLiked, result.likesCount);
+      const nextIsLiked = result.isLiked;
+      const nextLikesCount = result.likesCount;
+      updatePostLikeInFeed(queryClient, postId, nextIsLiked, nextLikesCount);
+      queryClient.setQueryData<PostDetailResponse>(
+        ["posts", "detail", postId],
+        (cached: PostDetailResponse | undefined) => {
+          if (cached === undefined) {
+            return cached;
+          }
+          return {
+            ...cached,
+            data: {
+              ...cached.data,
+              post: {
+                ...cached.data.post,
+                isLiked: nextIsLiked,
+                likesCount: nextLikesCount,
+              },
+            },
+          };
+        },
+      );
     },
     onSettled: () => {
       setIsLikePending(false);

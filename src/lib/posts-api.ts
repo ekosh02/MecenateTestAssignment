@@ -49,6 +49,13 @@ export interface PostsResponse {
   };
 }
 
+export interface PostDetailResponse {
+  ok?: boolean;
+  data: {
+    post: Post;
+  };
+}
+
 export interface TogglePostLikeResult {
   isLiked?: boolean;
   likesCount?: number;
@@ -102,6 +109,14 @@ export async function fetchPosts(
   const body = await apiJson<PostsResponse>(buildPostsPath(params));
   if (body.ok === false) {
     throw new Error("Ответ posts: ok — false");
+  }
+  return body;
+}
+
+export async function fetchPostById(postId: string): Promise<PostDetailResponse> {
+  const body = await apiJson<PostDetailResponse>(`${POSTS_API_PATH}/${postId}`);
+  if (body.ok === false) {
+    throw new Error("Ответ post detail: ok — false");
   }
   return body;
 }

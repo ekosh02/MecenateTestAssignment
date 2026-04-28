@@ -4,7 +4,12 @@ import type {
   Updater,
 } from "@tanstack/react-query";
 import { POSTS_FEED_QUERY_KEY } from "./posts-api";
-import type { PostComment, PostCommentsResponse, PostsResponse } from "./posts-api";
+import type {
+  PostComment,
+  PostCommentsResponse,
+  PostDetailResponse,
+  PostsResponse,
+} from "./posts-api";
 
 function updateFeed(
   queryClient: QueryClient,
@@ -44,6 +49,33 @@ export function updatePostLikeInFeed(
   });
 }
 
+export function updatePostLikeInDetail(
+  queryClient: QueryClient,
+  postId: string,
+  isLiked: boolean,
+  likesCount: number,
+) {
+  queryClient.setQueryData<PostDetailResponse>(
+    ["posts", "detail", postId],
+    (cached: PostDetailResponse | undefined) => {
+      if (cached === undefined) {
+        return cached;
+      }
+      return {
+        ...cached,
+        data: {
+          ...cached.data,
+          post: {
+            ...cached.data.post,
+            isLiked,
+            likesCount,
+          },
+        },
+      };
+    },
+  );
+}
+
 export function updatePostLikesCountInFeed(
   queryClient: QueryClient,
   postId: string,
@@ -66,6 +98,31 @@ export function updatePostLikesCountInFeed(
       })),
     };
   });
+}
+
+export function updatePostLikesCountInDetail(
+  queryClient: QueryClient,
+  postId: string,
+  likesCount: number,
+) {
+  queryClient.setQueryData<PostDetailResponse>(
+    ["posts", "detail", postId],
+    (cached: PostDetailResponse | undefined) => {
+      if (cached === undefined) {
+        return cached;
+      }
+      return {
+        ...cached,
+        data: {
+          ...cached.data,
+          post: {
+            ...cached.data.post,
+            likesCount,
+          },
+        },
+      };
+    },
+  );
 }
 
 export function incrementPostCommentsCountInFeed(
