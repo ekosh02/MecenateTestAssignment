@@ -19,6 +19,8 @@ const PostCard = ({
   coverAspectRatio,
   coverImageRef,
   onDonatePress,
+  onLikePress,
+  isLikePending,
 }: PostCardProps) => {
   const isPaid = post.tier === "paid";
 
@@ -103,6 +105,8 @@ const PostCard = ({
         likesCount={post.likesCount}
         commentsCount={post.commentsCount}
         isLiked={post.isLiked}
+        onLikePress={onLikePress}
+        isLikePending={isLikePending}
         style={{ paddingHorizontal: 13 }}
       />
     </View>

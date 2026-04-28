@@ -6,8 +6,12 @@ export interface PostCardProps {
   coverAspectRatio: number;
   coverImageRef?: ImageRef;
   onDonatePress?: () => void;
+  onLikePress?: () => void;
+  isLikePending?: boolean;
 }
 
 export interface PostListRowProps {
   post: Post;
+  onLikePress?: (postId: string) => void;
+  isLikePending?: boolean;
 }

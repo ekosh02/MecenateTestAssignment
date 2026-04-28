@@ -15,14 +15,18 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 16,
   },
-  metaItemLiked: {
-    backgroundColor: "#FF2B75",
+  iconWrap: {
+    width: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  iconLayer: {
+    position: "absolute",
   },
   metaText: {
     fontSize: 13,
     color: "#6B7280",
-  },
-  metaTextLiked: {
-    color: "#FFFFFF",
   },
 });

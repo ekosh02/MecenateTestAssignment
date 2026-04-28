@@ -10,9 +10,17 @@ import {
   POSTS_FEED_QUERY_KEY,
   POSTS_FEED_TIER,
   fetchPosts,
+  togglePostLike,
+  type Post,
+  type PostsResponse,
 } from "@/src/lib";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   type ListRenderItem,
@@ -24,6 +32,10 @@ import { styles } from "./styles";
 import { type FeedRow, isSkeletonRow } from "./types";
 
 const PostsScreen = () => {
+  const queryClient = useQueryClient();
+  const [pendingLikeIds, setPendingLikeIds] = useState<Record<string, boolean>>(
+    {},
+  );
   const query = useInfiniteQuery({
     queryKey: [...POSTS_FEED_QUERY_KEY],
     initialPageParam: undefined as string | undefined,
@@ -56,12 +68,98 @@ const PostsScreen = () => {
 
   const listData: FeedRow[] = showFeedSkeleton ? skeletonRows : posts;
 
+  const setPostLikeState = useCallback(
+    (postId: string, isLiked: boolean, likesCount: number) => {
+      queryClient.setQueryData<InfiniteData<PostsResponse>>(
+        [...POSTS_FEED_QUERY_KEY],
+        (cached) => {
+          if (cached === undefined) {
+            return cached;
+          }
+          return {
+            ...cached,
+            pages: cached.pages.map((page) => ({
+              ...page,
+              data: {
+                ...page.data,
+                posts: page.data.posts.map((post) =>
+                  post.id === postId ? { ...post, isLiked, likesCount } : post,
+                ),
+              },
+            })),
+          };
+        },
+      );
+    },
+    [queryClient],
+  );
+
+  const likeMutation = useMutation({
+    mutationFn: togglePostLike,
+    onMutate: async (postId) => {
+      await queryClient.cancelQueries({ queryKey: [...POSTS_FEED_QUERY_KEY] });
+      const previousFeed = queryClient.getQueryData<InfiniteData<PostsResponse>>([
+        ...POSTS_FEED_QUERY_KEY,
+      ]);
+      const currentPost = previousFeed?.pages
+        .flatMap((page) => page.data.posts)
+        .find((post) => post.id === postId);
+      if (currentPost === undefined) {
+        return { previousFeed, postId };
+      }
+      const nextIsLiked = !currentPost.isLiked;
+      const nextLikesCount = Math.max(
+        0,
+        currentPost.likesCount + (nextIsLiked ? 1 : -1),
+      );
+      setPostLikeState(postId, nextIsLiked, nextLikesCount);
+      setPendingLikeIds((prev) => ({ ...prev, [postId]: true }));
+      return { previousFeed, postId };
+    },
+    onError: (_error, _postId, context) => {
+      if (context?.previousFeed !== undefined) {
+        queryClient.setQueryData([...POSTS_FEED_QUERY_KEY], context.previousFeed);
+      }
+    },
+    onSuccess: (result, postId) => {
+      if (result.isLiked === undefined || result.likesCount === undefined) {
+        return;
+      }
+      setPostLikeState(postId, result.isLiked, result.likesCount);
+    },
+    onSettled: (_result, _error, postId) => {
+      setPendingLikeIds((prev) => {
+        const next = { ...prev };
+        delete next[postId];
+        return next;
+      });
+    },
+  });
+
+  const onLikePress = useCallback(
+    (postId: string) => {
+      if (pendingLikeIds[postId]) {
+        return;
+      }
+      likeMutation.mutate(postId);
+    },
+    [likeMutation, pendingLikeIds],
+  );
+
   const keyExtractor = useCallback((item: FeedRow) => item.id, []);
 
   const renderItem = useCallback<ListRenderItem<FeedRow>>(
     ({ item }) =>
-      isSkeletonRow(item) ? <PostCardSkeleton /> : <PostListRow post={item} />,
-    [],
+      isSkeletonRow(item) ? (
+        <PostCardSkeleton />
+      ) : (
+        <PostListRow
+          post={item as Post}
+          onLikePress={onLikePress}
+          isLikePending={Boolean(pendingLikeIds[item.id])}
+        />
+      ),
+    [onLikePress, pendingLikeIds],
   );
 
   const onLoadMore = useCallback(() => {

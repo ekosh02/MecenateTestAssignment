@@ -1,5 +1,5 @@
 import { POSTS_API_PATH } from "@/src/constants/api";
-import { apiJson } from "@/src/lib/api";
+import { apiFetch, apiJson } from "@/src/lib/api";
 
 export const POSTS_FEED_PAGE_SIZE = 10;
 export const POSTS_FEED_TIER = "free" as const;
@@ -49,6 +49,11 @@ export interface PostsResponse {
   };
 }
 
+export interface TogglePostLikeResult {
+  isLiked?: boolean;
+  likesCount?: number;
+}
+
 export function buildPostsPath(params: GetPostsParams = {}): string {
   const search = new URLSearchParams();
   if (params.limit !== undefined) {
@@ -75,6 +80,34 @@ export async function fetchPosts(
     throw new Error("Ответ posts: ok — false");
   }
   return body;
+}
+
+export async function togglePostLike(postId: string): Promise<TogglePostLikeResult> {
+  const response = await apiFetch(`${POSTS_API_PATH}/${postId}/like`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const text = await response.text();
+  if (text.length === 0) {
+    return {};
+  }
+
+  try {
+    const body = JSON.parse(text) as {
+      data?: { isLiked?: boolean; likesCount?: number };
+      isLiked?: boolean;
+      likesCount?: number;
+    };
+    return {
+      isLiked: body.data?.isLiked ?? body.isLiked,
+      likesCount: body.data?.likesCount ?? body.likesCount,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export function findPostInFeedPages(

@@ -13,14 +13,22 @@ import { COLORS } from "@/src/constants/colors";
 import { usePostCoverImage } from "@/src/hooks/use-post-cover-image";
 import {
   findPostInFeedPages,
+  POSTS_FEED_PAGE_SIZE,
   POSTS_FEED_QUERY_KEY,
+  POSTS_FEED_TIER,
+  fetchPosts,
+  togglePostLike,
   type Post,
   type PostsResponse,
 } from "@/src/lib";
 import { normalizeRouteParam } from "@/src/lib/normalize-route-param";
 import { Ionicons } from "@expo/vector-icons";
 import type { InfiniteData } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
@@ -41,21 +49,31 @@ const PostDetailScreen = () => {
   const { id: idParam } = useLocalSearchParams<{ id?: string | string[] }>();
   const id = normalizeRouteParam(idParam);
   const queryClient = useQueryClient();
+  const feedQuery = useInfiniteQuery({
+    queryKey: [...POSTS_FEED_QUERY_KEY],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      fetchPosts({
+        limit: POSTS_FEED_PAGE_SIZE,
+        cursor: pageParam,
+        tier: POSTS_FEED_TIER,
+      }),
+    getNextPageParam: (last) =>
+      last.data.hasMore && last.data.nextCursor
+        ? last.data.nextCursor
+        : undefined,
+  });
 
   const post = useMemo((): Post | undefined => {
     if (id === undefined) {
       return undefined;
     }
-    return findPostInFeedPages(
-      queryClient.getQueryData<InfiniteData<PostsResponse>>([
-        ...POSTS_FEED_QUERY_KEY,
-      ])?.pages,
-      id,
-    );
-  }, [id, queryClient]);
+    return findPostInFeedPages(feedQuery.data?.pages, id);
+  }, [feedQuery.data?.pages, id]);
 
   const [expanded, setExpanded] = useState(false);
   const [showToggle, setShowToggle] = useState(false);
+  const [isLikePending, setIsLikePending] = useState(false);
 
   useEffect(() => {
     setExpanded(false);
@@ -75,6 +93,80 @@ const PostDetailScreen = () => {
   const handleBack = useCallback(() => router.back(), []);
   const cover = usePostCoverImage(post?.coverUrl ?? "");
 
+  const setPostLikeState = useCallback(
+    (postId: string, isLiked: boolean, likesCount: number) => {
+      queryClient.setQueryData<InfiniteData<PostsResponse>>(
+        [...POSTS_FEED_QUERY_KEY],
+        (cached) => {
+          if (cached === undefined) {
+            return cached;
+          }
+          return {
+            ...cached,
+            pages: cached.pages.map((page) => ({
+              ...page,
+              data: {
+                ...page.data,
+                posts: page.data.posts.map((item) =>
+                  item.id === postId ? { ...item, isLiked, likesCount } : item,
+                ),
+              },
+            })),
+          };
+        },
+      );
+    },
+    [queryClient],
+  );
+
+  const likeMutation = useMutation({
+    mutationFn: togglePostLike,
+    onMutate: async (postId) => {
+      await queryClient.cancelQueries({ queryKey: [...POSTS_FEED_QUERY_KEY] });
+      const previousFeed = queryClient.getQueryData<
+        InfiniteData<PostsResponse>
+      >([...POSTS_FEED_QUERY_KEY]);
+      const currentPost = previousFeed?.pages
+        .flatMap((page) => page.data.posts)
+        .find((item) => item.id === postId);
+      if (currentPost === undefined) {
+        return { previousFeed, postId };
+      }
+      const nextIsLiked = !currentPost.isLiked;
+      const nextLikesCount = Math.max(
+        0,
+        currentPost.likesCount + (nextIsLiked ? 1 : -1),
+      );
+      setPostLikeState(postId, nextIsLiked, nextLikesCount);
+      setIsLikePending(true);
+      return { previousFeed, postId };
+    },
+    onError: (_error, _postId, context) => {
+      if (context?.previousFeed !== undefined) {
+        queryClient.setQueryData(
+          [...POSTS_FEED_QUERY_KEY],
+          context.previousFeed,
+        );
+      }
+    },
+    onSuccess: (result, postId) => {
+      if (result.isLiked === undefined || result.likesCount === undefined) {
+        return;
+      }
+      setPostLikeState(postId, result.isLiked, result.likesCount);
+    },
+    onSettled: () => {
+      setIsLikePending(false);
+    },
+  });
+
+  const onLikePress = useCallback(() => {
+    if (post === undefined || isLikePending) {
+      return;
+    }
+    likeMutation.mutate(post.id);
+  }, [isLikePending, likeMutation, post]);
+
   if (post === undefined) {
     return (
       <View
@@ -87,9 +179,7 @@ const PostDetailScreen = () => {
         <PostsFeedError
           applyTopSafeArea={false}
           onRetry={() => {
-            void queryClient.invalidateQueries({
-              queryKey: [...POSTS_FEED_QUERY_KEY],
-            });
+            void feedQuery.refetch();
           }}
         />
       </View>
@@ -152,6 +242,8 @@ const PostDetailScreen = () => {
             likesCount={post.likesCount}
             commentsCount={post.commentsCount}
             isLiked={post.isLiked}
+            onLikePress={onLikePress}
+            isLikePending={isLikePending}
             style={styles.metaRow}
           />
           <DetailBody
